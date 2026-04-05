@@ -7,6 +7,9 @@ from sqlmodel import Session, select, SQLModel
 from database import get_session
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+# -------------------
+from schemas import ProductCreate
+
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -122,3 +125,96 @@ async def logout():
     # Destroy the cookie
     response.delete_cookie("kylikeio_session")
     return response
+
+# -------------------prosthetw--------------------------------------
+
+@app.get("/menu")
+def get_menu(db: Session = Depends(get_session)):
+    products = db.exec(select(Product)).all()
+    return products
+
+
+
+#ADD MENU ITEM
+@app.post("/menu")
+def create_product(product_data: ProductCreate, db: Session = Depends(get_session)):
+    product = Product(
+        name=product_data.name,
+        category=product_data.category,
+        price=product_data.price
+    )
+
+    db.add(product)
+    db.commit()
+    db.refresh(product)
+
+    # Add options (extras)
+    for opt in product_data.options:
+        option = ProductOption(
+            product_id=product.id,
+            group_name=opt.group_name,
+            value=opt.value,
+            extra_price=opt.extra_price
+        )
+        db.add(option)
+
+    db.commit()
+
+    return product
+
+# DELETE MENU ITEM
+@app.delete("/menu/{product_id}")
+def delete_product(product_id: int, db: Session = Depends(get_session)):
+    product = db.get(Product, product_id)
+
+    if not product:
+        return {"error": "Not found"}
+
+    db.delete(product)
+    db.commit()
+
+    return {"status": "deleted"}
+
+# UPDATE MENU ITEM
+@app.put("/menu/{product_id}")
+def update_product(product_id: int, data: dict, db: Session = Depends(get_session)):
+    product = db.get(Product, product_id)
+
+    if not product:
+        return {"error": "Not found"}
+
+    if "price" in data:
+        product.price = data["price"]
+
+    if "category" in data:
+        product.category = data["category"]
+
+    db.add(product)
+    db.commit()
+
+    return {"status": "updated"}
+
+#GET OPTIONS
+@app.get("/menu/{product_id}/options")
+def get_options(product_id: int, db: Session = Depends(get_session)):
+    options = db.exec(
+        select(ProductOption).where(ProductOption.product_id == product_id)
+    ).all()
+
+    return options
+
+
+#ADD OPTION
+@app.post("/menu/{product_id}/options")
+def add_option(product_id: int, data: ProductOptionCreate, db: Session = Depends(get_session)):
+    option = ProductOption(
+        product_id=product_id,
+        group_name=data.group_name,
+        value=data.value,
+        extra_price=data.extra_price
+    )
+
+    db.add(option)
+    db.commit()
+
+    return {"status": "option added"}
