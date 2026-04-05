@@ -2,5 +2,3 @@
 /rava
 *.pyc
 *.db
-__pycache__/database.cpython-314.pyc
-__pycache__/main.cpython-314.pyc
