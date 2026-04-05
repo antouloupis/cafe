@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <script src="/static/htmx.min.js"></script>
+</head>
+<body>
+    <h1>Coffee Menu</h1>
+    
+    <div id="menu-container">
+        <ul>
+            {% for product in products %}
+                <li>
+                    <strong>{{ product.name }}</strong> - {{ product.price }} cents
+                    <button hx-post="/add-to-cart/{{ product.id }}">Add</button>
+                </li>
+            {% else %}
+                <div style="padding: 20px; border: 1px dashed #ccc; background: #f9f9f9;">
+                    <h3>The Cafe is getting ready!</h3>
+                    <p>There are no products on the menu yet. The admin needs to add inventory.</p>
+                </div>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

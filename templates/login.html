@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login</title>
+</head>
+<body style="font-family: sans-serif; display: flex; justify-content: center; margin-top: 100px;">
+    
+    <div style="border: 1px solid #ccc; padding: 20px; border-radius: 8px;">
+        <h2>Kylikeio Admin</h2>
+        
+        {% if error %}
+            <p style="color: red; background: #ffe6e6; padding: 10px;">{{ error }}</p>
+        {% endif %}
+
+        <form action="/login" method="POST">
+            <div style="margin-bottom: 10px;">
+                <label>Username:</label><br>
+                <input type="text" name="username" required>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label>Password:</label><br>
+                <input type="password" name="password" required>
+            </div>
+            
+            <button type="submit" style="width: 100%; padding: 10px;">Login</button>
+        </form>
+    </div>
+
+</body>
+</html>

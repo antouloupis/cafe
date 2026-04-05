@@ -1,14 +1,124 @@
-from fastapi import FastAPI
-# from database import init_db
+from fastapi import FastAPI, Depends, Form, Request
+from database import init_db,engine
+from models import Product, ProductOption, Order, OrderItem, OrderItemOption,AdminUser
+import os
+import hashlib
+from sqlmodel import Session, select, SQLModel
+from database import get_session
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
 
-# @app.on_event("startup")
-# def on_startup():
-#     # This ensures the .db file and tables are created inside the Docker volume
-#     init_db()
+class PasswordChangeSchema(SQLModel):
+    new_password: str
 
-@app.get("/")
-def home():
-    return {"status": "Cafe app is running on Python 3.14"}
+def hash_password(password: str):
+    # Standard SHA-256 for air-gapped environments
+    return hashlib.sha256(password.encode()).hexdigest()
 
+
+@app.on_event("startup")
+def on_startup():
+    # This ensures the .db file and tables are created inside the Docker volume
+    init_db()
+
+
+    with Session(engine) as session:
+            # Check if the admin already exists in the DB
+            existing_admin = session.exec(select(AdminUser).where(AdminUser.username == "admin")).first()
+            
+            if not existing_admin:
+                # First run! Grab from .env
+                env_pass = os.getenv("ADMIN_PASSWORD")
+                if env_pass:
+                    print("--- FIRST RUN: Creating Admin from .env ---")
+                    new_admin = AdminUser(hashed_password=hash_password(env_pass))
+                    session.add(new_admin)
+                    session.commit()
+                else:
+                    print("--- WARNING: No Admin and no .env password found! ---")
+
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request, db: Session = Depends(get_session)):
+    products = db.exec(select(Product)).all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="menu.html",
+        context={"products": products} 
+    )
+
+
+@app.post("/admin/change-password")
+def change_password(data: PasswordChangeSchema, db: Session = Depends(get_session)):
+    # 1. Fetch the admin
+    admin = db.exec(select(AdminUser).where(AdminUser.username == "admin")).first()
+    
+    # 2. Update with the new hash
+    admin.hashed_password = hash_password(data.new_password)
+    db.add(admin)
+    db.commit()
+    
+    return {"status": "Password updated in database"}
+
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_dashboard(request: Request):
+    # Check if the browser sent the secret cookie
+    session_cookie = request.cookies.get("kylikeio_session")
+    
+    if not session_cookie:
+        # No cookie? Show them the login page instead.
+        return templates.TemplateResponse(
+            request=request, 
+            name="login.html"
+        )
+        
+    # Valid cookie? Welcome to the VIP area.
+    return templates.TemplateResponse(
+        request=request, 
+        name="admin.html", 
+        context={"title": "Admin Dashboard"}
+    )
+
+
+@app.post("/login")
+async def login_post(
+    request: Request, 
+    username: str = Form(...), 
+    password: str = Form(...), 
+    db: Session = Depends(get_session)
+):
+    # Fetch admin from DB
+    admin = db.exec(select(AdminUser).where(AdminUser.username == username)).first()
+    
+    # Check if admin exists AND password matches your hash function
+    if not admin or admin.hashed_password != hash_password(password):
+        # Fail: Send them back to login with an error
+        return templates.TemplateResponse(
+            request=request, 
+            name="login.html", 
+            context={"error": "Invalid username or password"}
+        )
+        
+    # Success! Create a redirect response to send them to the dashboard
+    response = RedirectResponse(url="/admin", status_code=303)
+    
+    # Set the secure cookie. 
+    # (In a real production environment, you'd use a unique session token here)
+    response.set_cookie(
+        key="kylikeio_session", 
+        value="authenticated_admin_token", 
+        httponly=True # This stops hackers from reading the cookie with JavaScript
+    )
+    
+    return response
+
+@app.get("/logout")
+async def logout():
+    response = RedirectResponse(url="/admin", status_code=303)
+    # Destroy the cookie
+    response.delete_cookie("kylikeio_session")
+    return response
