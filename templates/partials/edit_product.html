@@ -1,0 +1,35 @@
+<div id="product-row-{{ product.id }}" class="expanded-card" style="border: 2px solid #001f3f; padding: 20px; margin-bottom: 15px;">
+    
+    <form hx-put="/admin/product/{{ product.id }}" hx-target="#product-row-{{ product.id }}">
+        <h3>Editing: {{ product.name }}</h3>
+        <input type="text" name="name" value="{{ product.name }}">
+        <input type="text" name="category" value="{{ product.category }}">
+        <input type="number" name="price" value="{{ product.price }}">
+        <button type="submit">Deploy Updates</button>
+        
+        <button type="button" hx-get="/admin/product/{{ product.id }}/summary" hx-target="#product-row-{{ product.id }}">Discard Changes</button>
+    </form>
+
+    <hr>
+
+    <h4>Extra Options</h4>
+    
+    <ul id="options-list-{{ product.id }}">
+        {% for option in product.options %}
+            <li>{{ option.group_name }}: {{ option.value }} (+{{ option.extra_price }}¢)</li>
+        {% endfor %}
+    </ul>
+
+    <form hx-post="/admin/product/{{ product.id }}/options" 
+          hx-target="#options-list-{{ product.id }}" 
+          hx-swap="beforeend" 
+          hx-on::after-request="this.reset()">
+        
+        <input type="text" name="group_name" placeholder="e.g. Sugar" required>
+        <input type="text" name="value" placeholder="e.g. Premium Cane" required>
+        <input type="number" name="extra_price" placeholder="Cost (cents)" required>
+        
+        <button type="submit" style="background: #806000; color: white;">Confirm Add</button>
+    </form>
+
+</div>

@@ -1,3 +1,5 @@
+from itertools import product
+
 from fastapi import APIRouter, Depends, Form, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlmodel import Session, select, SQLModel
@@ -16,11 +18,12 @@ class PasswordChangeSchema(SQLModel):
 # --- AUTH & DASHBOARD ---
 
 @router.get("/admin", response_class=HTMLResponse)
-async def admin_dashboard(request: Request):
+async def admin_dashboard(request: Request, db: Session = Depends(get_session)):
     session_cookie = request.cookies.get("kylikeio_session")
     if not session_cookie:
         return templates.TemplateResponse(request=request, name="login.html")
-    return templates.TemplateResponse(request=request, name="admin.html", context={"title": "Admin Dashboard"})
+    products = db.exec(select(Product)).all()
+    return templates.TemplateResponse(request=request, name="admin.html", context={"title": "Admin Dashboard", "products": products})
 
 @router.post("/login")
 async def login_post(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_session)):
@@ -54,19 +57,22 @@ def check_admin(request: Request):
         raise HTTPException(status_code=403, detail="Unauthorized")
 
 @router.post("/admin/product")
-def create_product(request: Request, product_data: ProductCreate, db: Session = Depends(get_session)):
+def create_product(
+    request: Request, 
+    name: str = Form(...),
+    category: str = Form(...),
+    price: int = Form(...),
+    db: Session = Depends(get_session)
+):
+
     check_admin(request) # Security gate
     
-    product = Product(name=product_data.name, category=product_data.category, price=product_data.price)
+    product = Product(name=name, category=category, price=price)
     db.add(product)
     db.commit()
     db.refresh(product)
 
-    for opt in product_data.options:
-        option = ProductOption(product_id=product.id, group_name=opt.group_name, value=opt.value, extra_price=opt.extra_price)
-        db.add(option)
-    db.commit()
-    return product
+    return HTMLResponse(f"<p style='color:green;'>✓ Added {product.name}! (ID: {product.id})</p>")
 
 @router.delete("/admin/product/{product_id}")
 def delete_product(request: Request, product_id: int, db: Session = Depends(get_session)):
@@ -79,23 +85,42 @@ def delete_product(request: Request, product_id: int, db: Session = Depends(get_
     return {"status": "deleted"}
 
 @router.put("/admin/product/{product_id}")
-def update_product(request: Request, product_id: int, data: dict, db: Session = Depends(get_session)):
+def update_product(request: Request, product_id: int, db: Session = Depends(get_session)):
     check_admin(request)
     product = db.get(Product, product_id)
-    if not product:
-        return {"error": "Not found"}
-    if "price" in data:
-        product.price = data["price"]
-    if "category" in data:
-        product.category = data["category"]
+    # if not product:
+    #     return {"error": "Not found"}
+    # if "price" in data:
+    #     product.price = data["price"]
+    # if "category" in data:
+    #     product.category = data["category"]
     db.add(product)
     db.commit()
     return {"status": "updated"}
 
 @router.post("/admin/product/{product_id}/options")
-def add_option(request: Request, product_id: int, data: ProductOptionCreate, db: Session = Depends(get_session)):
+def add_option(
+    request: Request,
+    product_id: int,
+    group_name: str = Form(...),
+    value: str = Form(...),
+    extra_price: int = Form(...),
+    db: Session = Depends(get_session)):
+    
     check_admin(request)
-    option = ProductOption(product_id=product_id, group_name=data.group_name, value=data.value, extra_price=data.extra_price)
+    option = ProductOption(product_id=product_id, group_name=group_name, value=value, extra_price=extra_price)
     db.add(option)
     db.commit()
     return {"status": "option added"}
+
+
+@router.get("/admin/product/{product_id}/edit", response_class=HTMLResponse)
+def get_edit_form(request: Request, product_id: int, db: Session = Depends(get_session)):
+    check_admin(request)
+    product = db.get(Product, product_id)
+    
+    return templates.TemplateResponse(
+        request=request, 
+        name="partials/edit_product.html", # A new file containing just the expanded HTML
+        context={"product": product}
+    )
