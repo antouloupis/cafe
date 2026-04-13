@@ -1,26 +1,148 @@
 <!DOCTYPE html>
-<html>
+<html lang="el">
 <head>
-    <title>{{ title }}</title>
-    <script src="/static/htmx.min.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="/static/output.css" />
+  <script src="/static/htmx.min.js"></script>
 </head>
-<body>
-    <h1>Coffee Menu</h1>
-    
-    <div id="menu-container">
-        <ul>
-            {% for product in products %}
-                <li>
-                    <strong>{{ product.name }}</strong> - {{ product.price }} cents
-                    <button hx-post="/add-to-cart/{{ product.id }}">Add</button>
-                </li>
-            {% else %}
-                <div style="padding: 20px; border: 1px dashed #ccc; background: #f9f9f9;">
-                    <h3>The Cafe is getting ready!</h3>
-                    <p>There are no products on the menu yet. The admin needs to add inventory.</p>
-                </div>
-            {% endfor %}
-        </ul>
+
+<body class="min-h-screen text-[#4b5320] bg-cover bg-center bg-fixed"
+      style="background-image: url('/static/bg.jpg');">
+  <div class="min-h-screen bg-[rgba(243,243,241,0.50)]">
+    <div id="page" class="min-h-screen flex flex-col">
+
+<!--y class="bg-[#f3f3f1] text-[#4b5320] min-h-screen"-->
+  <!--div id="page" class="min-h-screen flex flex-col"-->
+
+    <!-- Header -->
+    <!--header class="bg-[#f3f3f1]">
+      <div class="page-container py-8 text-center">
+        <h1 class="main-title">
+          ΜΕΝΟΥ ΚΨΜ 29 Μ/Π ΤΑΞ
+        </h1>
+      </div>
+    </header-->
+<!-- Header KAI TA DYO LOGO ARISTERA K DEKSIA -->
+    <header class="bg-[#f3f3f1]">
+  <div class="page-container py-8">
+    <div class="flex items-center justify-center gap-4 md:gap-8">
+      <img
+        src="/static/29taxlogonoback.png"
+        alt="29 Μ/Π ΤΑΞ Logo"
+        class="h-16 w-16 object-contain md:h-24 md:w-24"
+      />
+
+      <h1 class="main-title mb-0">
+        ΜΕΝΟΥ ΚΨΜ 29 Μ/Π ΤΑΞ
+      </h1>
+
+      <img
+        src="/static/geslogonoback.png"
+        alt="ΓΕΣ Logo"
+        class="h-16 w-16 object-contain md:h-24 md:w-24"
+      />
     </div>
+  </div>
+</header>
+
+    <!-- Main -->
+    <main class="flex-1">
+      <div class="page-container pt-2 pb-24 text-center">
+
+        
+        <!-- Category quick nav -->
+        <div class="category-nav">
+          {% for category in products_by_category.keys() %}
+            <a
+              href="#{{ category|replace(' ', '-') }}"
+              class="category-button"
+            >
+              {{ category }}
+            </a>
+          {% endfor %}
+        </div>
+
+        <!-- Categories -->
+        {% for category, items in products_by_category.items() %}
+          <section id="{{ category|replace(' ', '-') }}" class="mb-14">
+            <div class="category-header">
+              <div class="category-line"></div>
+              <h2 class="category-title">
+                {{ category }}
+              </h2>
+            </div>
+
+            <div class="product-grid">
+              {% for product in items %}
+                <button
+                  hx-get="/product-options/{{ product.id }}"
+                  hx-target="#modal-body"
+                  hx-swap="innerHTML"
+                  onclick="document.getElementById('modal').style.display='flex'"
+                  class="product-card"
+                >
+                  <div class="product-top">
+                    <h3 class="product-name">
+                      {{ product.name }}
+                    </h3>
+                    <span class="product-price">
+                      €{{ "%.2f"|format(product.price) }}
+                    </span>
+                  </div>
+
+                  {% if product.options %}
+                    <div class="extras-row">
+                      <span class="extras-badge">
+                        Extras Available
+                      </span>
+                    </div>
+                  {% endif %}
+                </button>
+              {% endfor %}
+            </div>
+          </section>
+        {% endfor %}
+      </div>
+    </main>
+
+    <!-- Fixed Cart Button -->
+    <div class="cart-button-wrapper">
+      <button
+        class="cart-button"
+        hx-get="/cart"
+        hx-target="#page"
+        hx-swap="innerHTML"
+        hx-push-url="true"
+      >
+        🛒 Συνέχεια Παραγγελίας
+      </button>
+    </div>
+
+    <!-- Modal -->
+    <div
+      id="modal"
+      class="modal-overlay"
+      onclick="if(event.target.id==='modal'){document.getElementById('modal').style.display='none'}">
+      <div class="modal-panel">
+        <div id="modal-body">
+          <p class="text-gray-500 text-center">Loading...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-[#556b2f] text-white mt-12">
+      <div class="footer-container">
+        <p> 29 Μ/Π 2026 © </p>
+        <div class="footer-right">
+          <span>Created by</span>
+          <span><b>Γραφείο Έρευνας Πληροφορικής</b></span>
+          <span><b>Ραβανός Ευστάθιος & Τουλούπης Αντώνιος</b></span>
+        </div>
+      </div>
+    </footer>
+  </div>
 </body>
 </html>

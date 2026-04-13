@@ -2,6 +2,6 @@
 /rava
 *.pyc
 *.db
-tailwindcss
+tailwindcss.exe
 *.exe
 static/output.css
