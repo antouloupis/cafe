@@ -1,0 +1,11 @@
+{% extends "base_admin.html" %}
+{% block content %}
+<div id="product-list-container" 
+     hx-get="/admin/product-list" 
+     hx-trigger="productUpdated from:body"  
+     hx-swap="innerHTML"
+     class="flex justify-center">
+    
+    {% include 'partials/product_list.html' %}
+</div>
+{% endblock %}

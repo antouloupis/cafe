@@ -6,24 +6,34 @@ from datetime import datetime, timezone
 class Product(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
-    category: str
-    price: int
-    options: List["ProductOption"] = Relationship(back_populates="product")
+    category_id: Optional[int] = Field(default=None, foreign_key="category.id")
+    price: float = Field(ge=0)
+    available: bool = Field(default=True)
+    options: List["ProductOption"] = Relationship(
+        back_populates="product",
+        cascade_delete=True)
+    category: Optional["Category"] = Relationship(back_populates="products")
+
+class Category(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(unique=True, index=True) # "unique" prevents the duplicate names!
+    products: List["Product"] = Relationship(back_populates="category")
     
 
 class ProductOption(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    product_id: int = Field(foreign_key="product.id")
+    product_id: int = Field(
+        foreign_key="product.id",
+        ondelete="CASCADE")
     group_name: str
     value: str
-    extra_price: int
+    extra_price: float = Field(ge=0)
     product: Product = Relationship(back_populates="options")
 
 #ORDER TABLES
 
 class Order(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    # customer_name: str
     location: str
     status: str = "pending"
     created_at: datetime = Field(
@@ -34,7 +44,8 @@ class Order(SQLModel, table=True):
 class OrderItem(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
-    price: int
+    price: float
+    quantity: int = Field(default=1,ge=1)
     order_id: int = Field(foreign_key="order.id")
     order: "Order" = Relationship(back_populates="items")
     options: List["OrderItemOption"] = Relationship(back_populates="order_item")

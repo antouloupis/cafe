@@ -1,0 +1,99 @@
+<div id="management" class="flex py-4 gap-5">
+<div>
+{% if products %}
+<div class="grid grid-cols-[1.5fr_1.5fr_0.5fr_1fr_2fr] bg-zinc-800 text-white font-bold">
+    <div class="p-3 border-r border-zinc-800">Προϊόν</div>
+    <div class="p-3 border-r border-zinc-800">Κατηγορία</div>
+    <div class="p-3 border-r border-zinc-800 text-center">Τιμή</div>
+    <div class="p-3 border-r border-zinc-800 text-center">Διαθέσιμο</div>
+    <div class="p-3 border-r border-zinc-800">Ενέργειες</div>
+  </div>
+
+{% for product in products %}
+    <div id="product-row-{{ product.id }}" class="grid grid-cols-[1.5fr_1.5fr_0.5fr_1fr_2fr]">
+        <div class="p-3 border-x border-b border-zinc-800 flex"><span class="my-auto">{{product.name}}</span></div>
+        <div class="p-3 border-r border-b border-zinc-800 flex"><span class="my-auto">{{product.category.name}}</span></div>
+        <div class="p-3 border-r border-b border-zinc-800 flex"><span  class="my-auto">{{product.price}} €</span></div>
+        <div class="p-3 border-r border-b border-zinc-800 flex">
+            <input 
+                type="checkbox" 
+                name="available"
+                class="w-5 h-5 py-3 rounded m-auto hover:cursor-pointer"
+                {% if product.available %}checked{% endif %}
+                hx-post="/admin/product/{{ product.id }}/toggle"
+                hx-swap="none">
+                
+        </div>
+        <div class="p-3 border-r border-b border-zinc-800 flex gap-3">
+            <button 
+                hx-get="/admin/product/{{ product.id }}/edit" 
+                hx-target="#modal-container" 
+                hx-swap="innerHTML"
+                class="bg-amber-400 hover:bg-amber-500 px-3 py-1 rounded hover:cursor-pointer">
+            Επεξεργασία
+            </button>
+            <button 
+                hx-delete="/admin/product/{{ product.id }}/delete"
+                hx-confirm="Σίγουρα θέλεις να διαγράψεις το προϊόν: {{product.name}};"
+                hx-target="#modal-container" hx-swap="innerHTML"
+                class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded hover:cursor-pointer">
+            Διαγραφή
+            </button>
+        </div>
+    </div>
+{% endfor %}
+
+
+
+
+{% else %}
+    <p>No products in the database yet.</p>
+{% endif %}
+
+        <button hx-get="/admin/product/create" 
+                hx-target="#modal-container" 
+                hx-swap="innerHTML"
+                class="bg-zinc-800 hover:cursor-pointer hover:bg-zinc-700 text-white mt-5 font-bold px-4 py-1.5 rounded transition-colors">
+            Δημιουργία νέου προϊόντος
+        </button>
+</div>
+
+    <div class="gap-3 flex flex-col border border-zinc-800 bg-white shadow-sm mb-auto">
+        <h2 class="bg-zinc-800 text-white font-bold text-center p-3">Κατηγορίες</h2>
+        
+        <div id="category-container" class="p-2 space-y-2">
+            {% for cat in categories %}
+                <div id="cat-row-{{cat.id}}" class="group flex items-center gap-2 p-1 hover:bg-indigo-200 rounded transition-colors">
+                    
+                    <input type="text" 
+                        name="catName" 
+                        value="{{cat.name}}"
+                        hx-post="/admin/category/{{cat.id}}/update"
+                        hx-trigger="change"
+                        class="flex-1 bg-transparent border-b border-transparent focus:border-blue-500 focus:bg-white px-2 py-1 outline-none transition-all"
+                        placeholder="Όνομα κατηγορίας">
+
+                    <button class="opacity-0 group-hover:opacity-100 text-gray-400 hover:cursor-pointer bg-red-700 rounded hover:bg-red-900 p-1 transition-all"
+                            hx-delete="/admin/category/{{cat.id}}/delete"
+                            hx-confirm="Διαγραφή κατηγορίας; Όλα τα προϊόντα της θα μείνουν χωρίς κατηγορία!"
+                            hx-target="#cat-row-{{cat.id}}"
+                            hx-swap="outerHTML">
+                        🗑️
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+
+        <form hx-post="/admin/category/create" 
+            hx-target="#category-container" 
+            hx-swap="beforeend"
+            hx-on::after-request="this.reset()"
+            class="p-4 border-t bg-gray-50">
+            <div class="flex gap-2">
+                <input type="text" name="catName" placeholder="Νέα κατηγορία..." required
+                    class="flex-1 min-w-0 border rounded px-2 py-1.5 text-sm focus:border-blue-400 outline-none">
+                <button type="submit" class="bg-zinc-800 text-white px-3 py-1 rounded hover:bg-zinc-700 font-bold">+</button>
+            </div>
+        </form>
+    </div>
+</div>

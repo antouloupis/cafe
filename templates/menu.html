@@ -8,23 +8,10 @@
   <script src="/static/htmx.min.js"></script>
 </head>
 
-<body class="min-h-screen text-[#4b5320] bg-cover bg-center bg-fixed"
+<body class="text-[#4b5320] bg-cover bg-center bg-fixed"
       style="background-image: url('/static/bg.jpg');">
   <div class="min-h-screen bg-[rgba(243,243,241,0.50)]">
-    <div id="page" class="min-h-screen flex flex-col">
-
-<!--y class="bg-[#f3f3f1] text-[#4b5320] min-h-screen"-->
-  <!--div id="page" class="min-h-screen flex flex-col"-->
-
-    <!-- Header -->
-    <!--header class="bg-[#f3f3f1]">
-      <div class="page-container py-8 text-center">
-        <h1 class="main-title">
-          ΜΕΝΟΥ ΚΨΜ 29 Μ/Π ΤΑΞ
-        </h1>
-      </div>
-    </header-->
-<!-- Header KAI TA DYO LOGO ARISTERA K DEKSIA -->
+    <div id="page" class="flex flex-col">
     <header class="bg-[#f3f3f1]">
   <div class="page-container py-8">
     <div class="flex items-center justify-center gap-4 md:gap-8">
@@ -54,34 +41,35 @@
         
         <!-- Category quick nav -->
         <div class="category-nav">
-          {% for category in products_by_category.keys() %}
+          {% for cat in categories %}
             <a
-              href="#{{ category|replace(' ', '-') }}"
+              href="#{{ cat.name |replace(' ', '-') }}"
               class="category-button"
             >
-              {{ category }}
+              {{ cat.name }}
             </a>
           {% endfor %}
         </div>
 
         <!-- Categories -->
-        {% for category, items in products_by_category.items() %}
-          <section id="{{ category|replace(' ', '-') }}" class="mb-14">
+        {% for cat in categories %}
+        {% if cat.products %}
+          <section id="{{ cat.name|replace(' ', '-') }}" class="mb-14">
             <div class="category-header">
               <div class="category-line"></div>
               <h2 class="category-title">
-                {{ category }}
+                {{ cat.name }}
               </h2>
             </div>
 
             <div class="product-grid">
-              {% for product in items %}
+              {% for product in cat.products %}
                 <button
                   hx-get="/product-options/{{ product.id }}"
                   hx-target="#modal-body"
                   hx-swap="innerHTML"
                   onclick="document.getElementById('modal').style.display='flex'"
-                  class="product-card"
+                  class="product-card {% if not product.available %} cursor-not-allowed disabled {% endif %}"
                 >
                   <div class="product-top">
                     <h3 class="product-name">
@@ -91,33 +79,26 @@
                       €{{ "%.2f"|format(product.price) }}
                     </span>
                   </div>
-
-                  {% if product.options %}
-                    <div class="extras-row">
-                      <span class="extras-badge">
-                        Extras Available
-                      </span>
-                    </div>
-                  {% endif %}
                 </button>
               {% endfor %}
             </div>
           </section>
+        {% endif %}
         {% endfor %}
       </div>
     </main>
 
     <!-- Fixed Cart Button -->
-    <div class="cart-button-wrapper">
-      <button
-        class="cart-button"
-        hx-get="/cart"
-        hx-target="#page"
-        hx-swap="innerHTML"
-        hx-push-url="true"
+    <div class="cart-button-wrapper cursor-not-allowed" id="cart-wrapper">
+      <a 
+        id="cart-btn"
+        href="/cart" 
+        class="cart-button {% if not cart %}grayscale pointer-events-none{% endif %}"
       >
-        🛒 Συνέχεια Παραγγελίας
-      </button>
+        <span id="cart-text">
+          {% if cart %}🛒 Συνέχεια Παραγγελίας{% else %}🛒 Άδειο{% endif %}
+        </span>
+      </a>
     </div>
 
     <!-- Modal -->
@@ -132,17 +113,27 @@
       </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-[#556b2f] text-white mt-12">
-      <div class="footer-container">
-        <p> 29 Μ/Π 2026 © </p>
-        <div class="footer-right">
-          <span>Created by</span>
-          <span><b>Γραφείο Έρευνας Πληροφορικής</b></span>
-          <span><b>Ραβανός Ευστάθιος & Τουλούπης Αντώνιος</b></span>
-        </div>
-      </div>
-    </footer>
+
   </div>
+  {% include "partials/footer.html" %}
 </body>
+<script>
+  document.body.addEventListener('htmx:afterRequest', function(evt) {
+    if (evt.detail.requestConfig.path.includes('/add-to-cart/')) {
+        const cartBtn = document.getElementById('cart-btn');
+        const cartText = document.getElementById('cart-text');
+        const cartWrap = document.getElementById('cart-wrapper');
+
+        cartBtn.classList.remove('pointer-events-none', 'grayscale');
+        cartWrap.classList.remove('cursor-not-allowed');
+        cartText.innerText = '🛒 Προβολή καλαθιού';
+        
+        cartBtn.animate([
+            { transform: 'scale(1)' },
+            { transform: 'scale(1.1)' },
+            { transform: 'scale(1)' }
+        ], { duration: 300 });
+    }
+});
+</script>
 </html>

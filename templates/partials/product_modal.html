@@ -1,0 +1,183 @@
+<div id="edit-modal" open class="fixed inset-0 z-50 flex items-center justify-center bg-white/60">
+<div class="bg-olive-100 border rounded border-gray-500 px-6 py-3 max-w-1/2 min-h-0 shadow-2xl overflow-y-auto" >
+<div class=" flex flex-col gap-5">
+    <div class="flex justify-between p-3">
+        <h3 class="text-2xl">{{ modal.title }}</h3>
+        <button type="button" class="bg-red-500 rounded rounded-5 px-3 py-1 text-white font-bold transition-colors hover:cursor-pointer hover:bg-red-700" onclick="document.getElementById('edit-modal').remove()">X</button>
+    
+    </div>
+        
+
+
+    <form id="main-edit-form" hx-post="{{ modal.submitUrl }}" class="gap-3 flex flex-col">
+        <div class="grid grid-cols-3 gap-5">
+            <div class="flex flex-col">
+                <label>Όνομα:</label>
+                <input 
+                type="text"
+                name="name"
+                placeholder="π.χ Φρέντο Εσπρέσσο" 
+                value="{{ product.name }}" 
+                class="flex-1 min-w-0 shadow-sm border border-gray-300 bg-white rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+            </div>
+
+            <div class="flex flex-col">
+                <label>Κατηγορία:</label>
+                <select name="category_id" class="flex-1 min-w-0 shadow-sm border border-gray-300 bg-white rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400 hover:cursor-pointer">
+                <option value="">No Category</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if product.category_id == cat.id %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                {% endfor %}
+                </select>
+            </div>
+            
+            <div class="flex flex-col">
+                <label for="price">Τιμή:</label>
+                <input 
+                type="number" 
+                step="0.01"
+                min="0"
+                name="price"
+                value="{{ product.price }}" 
+                placeholder="π.χ 1.75" 
+                class="flex-1 min-w-0 shadow-sm border border-gray-300 bg-white rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+            </div>
+        </div>
+
+        <hr>
+        <h4 class="font-semibold">Επιλογές προϊόντος:</h4>
+        <div class="grow flex flex-col min-h-0">
+        <div id="options-container" 
+        class="overflow-y-auto snap-y snap-mandatory flex flex-col gap-1 max-h-[140px] border border-gray-200 rounded shadow-inner bg-white">
+            {% for option in product.options %}
+                <div class="option-row bg-white border p-3 rounded flex gap-4 items-end mb-2 shadow-sm border-l-4 border-l-blue-400">
+                    <input type="hidden" name="opt_id" value="{{ option.id }}">
+                    
+                    <input class="flex-1 min-w-0 shadow-sm border border-gray-300 bg-white rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400" 
+                        type="text" name="opt_group" value="{{ option.group_name }}" placeholder="Γκρούπ">
+                    
+                    <input class="flex-1 min-w-0 shadow-sm border border-gray-300 bg-white rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400" 
+                        type="text" name="opt_val" value="{{ option.value }}" placeholder="Όνομα">
+                    
+                    <input class="w-20 shadow-sm border border-gray-300 bg-white rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400" 
+                        type="number" name="opt_price" min="0" step="0.01" value="{{ option.extra_price }}" placeholder="0.00">
+                    
+                    <button type="button" class="text-red-500 hover:bg-red-50 p-1.5 rounded shrink-0 hover:cursor-pointer transition-colors" 
+                            onclick="this.closest('.option-row').remove()" title="Διαγραφή">
+                        🗑️ Διαγραφή  
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+        </div>
+    </form>
+<div class="bg-white p-4 mt-2 border border-dashed border-gray-400">
+    <h5 class="font-bold mb-2">++ ΠΡΟΣΘΗΚΗ ΝΕΑΣ ΕΠΙΛΟΓΗΣ:</h5>
+    <div class="flex gap-2 items-end">
+        <div class="flex flex-col">
+            <label class="text-xs font-bold text-gray-600">Τίτλος Γκρούπ:</label>
+            <input id="temp_group" type="text" placeholder="π.χ. ΖΑΧΑΡΗ" 
+                   class="flex-1 min-w-0 shadow-sm border border-gray-300 bg-white rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+        </div>
+        <div class="flex flex-col">
+            <label class="text-xs font-bold text-gray-600">Όνομα επιλογής:</label>
+            <input id="temp_val" type="text" placeholder="π.χ. Μαύρη" 
+                   class="flex-1 min-w-0 shadow-sm border border-gray-300 bg-white rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+        </div>
+        <div class="flex flex-col">
+            <label class="text-xs font-bold text-gray-600">Επιπλέον Τιμή:</label>
+            <input id="temp_price" type="number" step="0.01" placeholder="0.50" 
+                   class="flex-1 min-w-0 w-24 shadow-sm border border-gray-300 bg-white rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+        </div>
+        <button type="button" onclick="addOptionToUI()" 
+                class="border-2 border-green-600 text-green-600 hover:bg-green-100 hover:cursor-pointer font-bold px-4 py-1.5 rounded text-sm transition-colors">
+            ΠΡΟΣΘΗΚΗ
+        </button>
+    </div>
+</div>
+    <div class="flex justify-end p-2 gap-4">
+        <button type="button" 
+        onclick="document.getElementById('edit-modal').remove()" 
+        class="text-gray-800 border-2 border-gray-500 hover:bg-zinc-200 px-8 py-2 rounded transition-colors">Ακύρωση</button>
+        
+        <button type="submit" 
+        form="main-edit-form" 
+        class="bg-green-600 hover:bg-green-700 hover:cursor-pointer text-white px-8 py-2 rounded transition-colors">{{modal.btn}}</button>
+    </div>
+
+</div>
+</div>
+</div>
+
+<script>
+function addOptionFields() {
+    const container = document.getElementById('options-container');
+    const html = `
+        <div class="option-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <input type="hidden" name="opt_id" value="new">
+            <input class="shadow-xl border-b" type="text" name="opt_group" placeholder="Group">
+            <input class="shadow-xl border-b" type="text" name="opt_val" placeholder="Value">
+            <input class="shadow-xl border-b" type="number" min="0" step="0.01" name="opt_price" value="0">
+            <button type="button" style="color: red;" onclick="this.closest('.option-row').remove()">🗑️</button>
+        </div>`;
+    container.insertAdjacentHTML('beforeend', html);
+}
+
+function addOptionToUI() {
+    const group = document.getElementById('temp_group');
+    const val = document.getElementById('temp_val');
+    const price = document.getElementById('temp_price');
+
+    if (!group.value || !val.value) {
+        alert("Συμπληρώστε Γκρούπ και Όνομα!");
+        return;
+    }
+
+    const container = document.getElementById('options-container');
+    
+    // Using backticks to preserve your original row layout
+    const html = `
+        <div class="option-row  border p-3 rounded flex gap-4 items-end mb-2 shadow-sm border-l-4 border-l-amber-400 bg-amber-50 transition-all">
+            <input type="hidden" name="opt_id" value="0">
+            
+            <div class="flex flex-col">
+                <input type="text" name="opt_group" value="${group.value}" class="flex-1 min-w-0 shadow-sm border border-gray-300 bg-white rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+            </div>
+
+            <div class="flex flex-col">
+                <input type="text" name="opt_val" value="${val.value}" class="flex-1 min-w-0 shadow-sm border border-gray-300 bg-white rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+            </div>
+
+            <div class="flex flex-col">
+                <input type="number" name="opt_price" step="0.01" value="${price.value || 0}" class="w-20 shadow-sm border border-gray-300 bg-white rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+            </div>
+
+            <button type="button" class="text-red-500 hover:bg-red-50 p-1.5 rounded shrink-0 hover:cursor-pointer transition-colors" onclick="this.closest('.option-row').remove()">
+                🗑️ Διαγραφή
+            </button>
+        </div>`;
+    
+    container.insertAdjacentHTML('beforeend', html);
+
+    // Clear the scratchpad
+    group.value = '';
+    val.value = '';
+    price.value = '';
+}
+
+        function closeOnEsc(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('edit-modal');
+                if (modal) {
+                    modal.remove();
+                    // Clean up the listener so it doesn't run in the background
+                    document.removeEventListener('keydown', closeOnEsc); 
+                }
+            }
+        }
+        
+        // Attach it to the whole document the moment the modal loads
+        document.addEventListener('keydown', closeOnEsc);
+</script>

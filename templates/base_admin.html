@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <script src="/static/htmx.min.js"></script>  
+    <link href="/static/output.css" rel="stylesheet">
+    {% block head %}{% endblock %} 
+</head>
+    <nav class="w-full p-5 justify-between flex bg-lime-950">
+        <h1 class="font-light text-2xl text-white text-bold">Σελίδα διαχείρισης κυλικείου</h1>
+        <a href="/logout" class="bg-emerald-400 hover:bg-zinc-400 p-2 hover:border-blue-500 rounded font-bold">Αποσύνδεση</a>
+    </nav>
+<body>
+<div id="modal-container"></div>
+<main class="flex flex-col h-screen">
+    {% block content %} {% endblock %}
+</main>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

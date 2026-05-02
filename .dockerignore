@@ -1,0 +1,6 @@
+.env
+/rava
+*.pyc
+tailwindcss
+*.exe
+node_modules/

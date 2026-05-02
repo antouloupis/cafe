@@ -1,0 +1,28 @@
+{% for order in orders %}
+    <!-- Use 'article' for each individual order unit -->
+    <article class="flex border-b">
+        
+        <!-- SECTION 1: The Clickable Info Area -->
+        <div class="flex-grow p-4 cursor-pointer hover:bg-olive-100" 
+             hx-get="/admin/order/{{ order.id }}/details" 
+             hx-target="#detail-pane">
+            <h3 class="font-bold text-lg">#{{ order.id }}</h3>
+            <p class="text-sm uppercase font-extrabold text-[#556b2f]">{{ order.location }}</p>
+            <!-- Here we use our 'Time Ago' logic -->
+            <time class="text-xs text-gray-500">{{ order.created_at }}</time>
+        </div>
+
+        <!-- SECTION 2: The Immediate Actions -->
+        <div class="p-4 flex flex-col justify-center border-l">
+            <button hx-post="/admin/order/{{ order.id }}/status?new_status=completed&current_filter={{ current_status }}"
+                    hx-target="#admin-orders-list"
+                    class="bg-[#556b2f] text-white px-3 py-1 text-xs font-bold mb-1">
+                DONE
+            </button>
+        </div>
+    </article>
+{% else %}
+    <div class="p-8 text-center text-gray-400 italic">
+        No pending orders. Take a break!
+    </div>
+{% endfor %}
