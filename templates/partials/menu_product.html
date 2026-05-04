@@ -10,12 +10,12 @@
 
 {% if product.options %}
 <div>
-    <h4 class="text-sm font-bold uppercase tracking-[0.2em] text-gray-500 mb-3 text-center">Extras</h4>
+    <h4 class="text-2xl font-bold uppercase tracking-[0.2em] text-gray-500 mb-3 text-center">Επιλογές</h4>
     
     <div class="space-y-6">
         {% for group in product.options | groupby('group_name') %}
             <div class="option-group">
-                <h5 class="text-[10px] font-black uppercase tracking-widest text-[#556b2f] mb-2 px-1">
+                <h5 class="text-xl font-black uppercase tracking-widest text-[#556b2f] mb-2 px-1">
                     {{ group.grouper }}
                 </h5>
                 
@@ -41,7 +41,7 @@
     <button hx-post="/add-to-cart/{{ product.id }}"
             hx-target="#modal-body"
             hx-include="[name='extras']"
-            class="w-full bg-[#556b2f] text-white py-4 px-4 font-bold uppercase tracking-wider hover:opacity-95 transition">
+            class="w-full bg-[#556b2f] text-white py-4 px-4 font-bold uppercase tracking-wider hover:opacity-95 transition cursor-pointer">
         Προσθήκη στο καλάθι
     </button>
 </div>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Κλειστό ΚΨΜ</title>
+  <link rel="stylesheet" href="/static/output.css" />
+
+  <style>
+    @keyframes shutterDown {
+      from {
+        transform: translateY(-100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .animate-shutterDown {
+      animation: shutterDown 2.2s ease-out forwards;
+    }
+  </style>
+</head>
+
+<body class="text-[#4b5320] bg-cover bg-center bg-fixed"
+      style="background-image: url('/static/bg.jpg');">
+
+  <div class="min-h-screen flex items-center justify-center bg-[rgba(243,243,241,0.70)] px-4">
+
+    <div class="max-w-3xl w-full text-center rounded-2xl shadow-2xl p-16 border-2 border-[#4b5320]
+                relative overflow-hidden min-h-[320px] flex items-center justify-center">
+
+      <!-- shutter animation -->
+      <div class="absolute inset-0 z-0 animate-shutterDown bg-cover bg-center"
+           style="background-image: url('/static/shutter.png');">
+      </div>
+
+      <!-- dark overlay -->
+      <div class="absolute inset-0 bg-black/35 z-10"></div>
+
+      <!-- content -->
+      <div class="relative z-20">
+
+        
+
+        <h1 class="text-5xl font-bold mb-4 text-white drop-shadow-lg">
+          Το ΚΨΜ είναι κλειστό!
+        </h1><br><br>
+
+          <p class="text-4xl mb-6 text-white drop-shadow-lg">
+          Οι παραγγελίες δεν είναι διαθέσιμες αυτή τη στιγμή...
+        </p>
+
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

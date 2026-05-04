@@ -12,10 +12,10 @@
 <div id="page" class="min-h-screen flex flex-col bg-cover bg-center bg-fixed" style="background-image: url('/static/bg.jpg');">
   <div class="min-h-screen bg-[rgba(243,243,241,0.50)] flex flex-col">
     
-    <header class="bg-[#f3f3f1]">
+    <header class="bg-[#ffffff]">
       <div class="page-container py-8">
         <div class="flex items-center justify-center gap-4 md:gap-8">
-          <img src="/static/29taxlogonoback.png" alt="Logo" class="h-16 w-16 md:h-24 md:w-24 object-contain" />
+          <img src="/static/29taxlogonoback.png" alt="Logo" class="h-16 w-14 md:h-24 md:w-24 object-contain" />
           <h1 class="main-title mb-0">ΚΑΛΑΘΙ ΠΑΡΑΓΓΕΛΙΑΣ</h1>
           <img src="/static/geslogonoback.png" alt="Logo" class="h-16 w-16 md:h-24 md:w-24 object-contain" />
         </div>
@@ -23,11 +23,11 @@
     </header>
 
     <main class="flex-1">
-      <div class="page-container pt-6 pb-24 text-center">
+      <div class="page-container pt-7 pb-24 text-center">
         {% if not cart %}
           <div class="max-w-2xl mx-auto bg-[#f8f8f6] border border-[#d6d6cc] shadow-sm p-8">
-            <h2 class="text-2xl font-extrabold uppercase text-[#2f3517]">Το καλάθι είναι άδειο</h2>
-            <button onclick="window.location='/'" class="mt-6 bg-[#556b2f] text-white px-6 py-3 font-bold uppercase">Επιστροφή στο Μενού</button>
+            <h2 class="text-4xl font-extrabold uppercase text-[#2f3517]">Το καλάθι είναι άδειο</h2>
+            <button onclick="window.location='/'" class="mt-6 bg-[#556b2f]  text-white px-6 py-5 font-bold uppercase cursor-pointer">Επιστροφή στο Μενού</button>
           </div>
         {% else %}
           <div class="max-w-5xl mx-auto space-y-6">
@@ -40,7 +40,7 @@
                     
                     {% if item.extras %}
                       <div class="mt-4 border-t border-[#d6d6cc] pt-4">
-                        <p class="text-xs font-bold uppercase text-gray-500 mb-2">Extras</p>
+                        <p class="text-xs font-bold uppercase text-gray-500 mb-2">Επιλογές</p>
                         {% for extra in item.extras %}
                           <div class="flex justify-between bg-white border border-[#d6d6cc] px-4 py-2 mb-2">
                             <span>{{ extra.group_name }}: {{ extra.value }}</span>
@@ -55,17 +55,17 @@
                     <div class="flex items-center gap-2">
                       <form hx-post="/decrease-cart-item/{{ item.product.id }}" hx-target="#page" hx-swap="outerHTML">
                         {% for extra in item.extras %}<input type="hidden" name="extras" value="{{ extra.id }}">{% endfor %}
-                        <button type="submit" class="bg-gray-200 px-4 py-2 font-bold border border-[#3f4f22]">−</button>
+                        <button type="submit" class="bg-gray-200 px-4 py-2 font-bold border border-[#3f4f22] cursor-pointer">−</button>
                       </form>
-                      <div class="bg-[#a3b18a] px-4 py-2 font-bold w-32 text-center">Ποσότητα: {{ item.qty }}</div>
+                      <div class="bg-[#a3b18a] px-4 py-3 font-bold w-32 text-center">Ποσότητα: {{ item.qty }}</div>
                       <form hx-post="/increase-cart-item/{{ item.product.id }}" hx-target="#page" hx-swap="outerHTML">
                         {% for extra in item.extras %}<input type="hidden" name="extras" value="{{ extra.id }}">{% endfor %}
-                        <button type="submit" class="bg-gray-200 px-4 py-2 font-bold border border-[#3f4f22]">+</button>
+                        <button type="submit" class="bg-gray-200 px-4 py-2 font-bold border border-[#3f4f22] cursor-pointer">+</button>
                       </form>
                     </div>
                     <form hx-post="/remove-from-cart/{{ item.product.id }}" hx-target="#page" hx-swap="outerHTML" class="w-full">
                        {% for extra in item.extras %}<input type="hidden" name="extras" value="{{ extra.id }}">{% endfor %}
-                       <button type="submit" class="bg-red-700 text-white py-2 w-full font-bold uppercase">Διαγραφή</button>
+                       <button type="submit" class="bg-red-700 text-white py-4 w-full font-bold uppercase cursor-pointer">Διαγραφή</button>
                     </form>
                   </div>
                 </div>
@@ -76,28 +76,35 @@
           <!-- Totals & Location -->
           <div class="max-w-5xl mx-auto mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
              <div class="bg-[#f8f8f6] border border-[#d6d6cc] p-6 text-left">
-                <label class="block text-sm font-bold uppercase mb-3">Τοποθεσία Παράδοσης</label>
-                <select id="delivery-location" name="location" class="w-full border p-3 font-semibold">
+                <label class="block text-xl font-bold uppercase mb-3">Τοποθεσία Παράδοσης</label>
+                <select id="delivery-location" name="location" class="w-full border p-4 text-xl font-semibold cursor-pointer">
                     <option value="1">1ο Γραφείο</option>
-                    <option value="5">Υπασπιστήριο</option>
-                    <!-- ... rest of options ... -->
+                    <option value="2">2ο Γραφείο</option>
+                    <option value="3">3ο Γραφείο</option>
+                    <option value="4">4ο Γραφείο</option>
+                    <option value="5">Γραφείο Έρευνας Πληροφορικής</option>
+                    <option value="6">Υπασπιστήριο</option>
+                    <option value="7">Επιτελάρχης</option>
+                    <option value="8">Συντονιστής</option>
+                    <option value="9">Υποδιοικητής</option>                    
                 </select>
              </div>
              <div class="bg-[#556b2f] text-white p-6 shadow-lg">
                 <p class="uppercase text-white/80">Γενικό Σύνολο</p>
                 <p class="text-4xl font-extrabold">€{{ "%.2f"|format(grand_total) }}</p>
                 <div class="mt-6 flex gap-3">
-                   <button hx-post="/place-order" hx-target="#page" hx-include="#delivery-location" 
-                           class="bg-white text-[#556b2f] px-6 py-3 font-bold uppercase flex-1">✅ Καταχώρηση</button>
-                   <button onclick="window.location='/'" class="border border-white px-6 py-3 font-bold uppercase">Μενού</button>
+                   <button hx-post="/place-order" hx-target="#page" hx-include="#delivery-location " 
+                           class="bg-white text-[#556b2f] px-6 py-3 font-bold uppercase flex-1 cursor-pointer">✅ Καταχώρηση</button>
+                   <button onclick="window.location='/'" class="border border-white px-9 py-5 font-bold uppercase cursor-pointer">Πίσω στο Μενού</button>
                 </div>
              </div>
-          </div>
+          </div
         {% endif %}
       </div>
     </main>
   </div>
 </div>
 
+{% include "partials/footer.html" %}
 </body>
 </html>

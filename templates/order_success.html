@@ -13,16 +13,16 @@
 <div id="page" class="min-h-screen flex flex-col bg-cover bg-center bg-fixed" style="background-image: url('/static/bg.jpg');">
   <div class="min-h-screen bg-[rgba(243,243,241,0.50)]">
     
-    <header class="bg-[#f3f3f1]">
+    <header class="bg-[#ffffff]">
       <div class="page-container py-8 flex items-center justify-center gap-8">
           <img src="/static/29taxlogonoback.png" class="h-16 w-16 md:h-24 md:w-24 object-contain" />
           <h1 class="main-title mb-0">ΤΕΛΟΣ ΠΑΡΑΓΓΕΛΙΑΣ</h1>
-          <img src="/static/geslogonoback.png" class="h-16 w-16 md:h-24 md:w-24 object-contain" />
+          <img src="/static/geslogonoback.png" class="h-16 w-18 md:h-24 md:w-24 object-contain" />
       </div>
     </header>
 
     <main class="page-container pt-10 pb-24">
-      <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+        <div class="max-w-4xl mx-auto flex flex-col space-y-20">
 
         <!-- Left Column: Animation -->
         <div class="bg-[#f8f8f6] border border-[#d6d6cc] shadow-sm p-10 text-center flex flex-col justify-center">
@@ -30,57 +30,71 @@
           <h2 class="text-3xl font-extrabold uppercase text-[#2f3517]">Η παραγγελία καταχωρήθηκε!</h2>
           
           <div class="mt-8 relative w-full max-w-md mx-auto h-32 border-y border-dashed border-[#b8b8ae] overflow-hidden">
-              <div class="absolute bottom-4 left-0 right-0 h-1 bg-[#7d8f61]"></div>
-              <!-- Your Soldier Animation HTML here -->
-              <div class="soldier-animation-container">
-                  <img src="/static/Soldier2.png" class="soldier-img" />
-              </div>
-          </div>
+            
+            <!-- ground line -->
+            <div class="absolute bottom-4 left-0 right-0 h-1 bg-[#7d8f61]"></div>
+            <!-- running soldier -->
+            <img 
+              src="/static/soldier-run.gif" 
+              class="absolute bottom-6 h-16 animate-run"
+            >
+           </div>
 
-          <button onclick="window.location='/'" class="mt-8 bg-[#556b2f] text-white px-6 py-3 font-bold uppercase">
+          <button onclick="window.location='/'" class="mt-8 bg-[#556b2f] text-white px-6 py-3 font-bold uppercase cursor-pointer">
               Επιστροφή στο Μενού
           </button>
         </div>
 
         <!-- Right Column: Order Review (Receipt) -->
         <div class="bg-[#f8f8f6] border border-[#d6d6cc] shadow-sm p-10">
-          <h2 class="text-2xl font-extrabold uppercase text-[#2f3517] text-center mb-6">Ανασκόπηση</h2>
           
-          <div class="space-y-4">
-            {% for item in items %}
-              <div class="bg-white border border-[#d6d6cc] p-4">
-                <div class="flex justify-between">
-                  <div>
-                    <h3 class="font-black uppercase text-[#2f3517]">{{ item.name }}</h3>
-                    <p class="text-sm text-gray-500">Ποσότητα: {{ item.qty }}</p>
-                  </div>
-                  <p class="font-bold">€{{ "%.2f"|format(item.total) }}</p>
-                </div>
+         <button
+          type="button"
+          class="w-full text-2xl font-extrabold uppercase text-[#2f3517] text-center mb-6 cursor-pointer flex items-center justify-center gap-3"
+          onclick="document.getElementById('review-content').classList.toggle('hidden'); document.getElementById('review-arrow').classList.toggle('rotate-180')">
+          Ανασκόπηση Παραγγελίας
+          <span id="review-arrow" class="transition-transform">▼</span>
+          </button> 
 
-                {% if item.extras %}
-                  <div class="mt-2 pt-2 border-t border-gray-100">
-                    {% for extra in item.extras %}
-                      <div class="text-xs flex justify-between text-gray-600 italic">
-                        <span>{{ extra.group }}: {{ extra.val }}</span>
-                        <span>+€{{ "%.2f"|format(extra.price) }}</span>
-                      </div>
-                    {% endfor %}
-                  </div>
-                {% endif %}
-              </div>
-            {% endfor %}
-          </div>
 
-          <div class="mt-6 p-5 bg-[#556b2f] text-white text-center">
-            <p class="text-xs uppercase opacity-80">Γενικό Σύνολο</p>
-            <p class="text-3xl font-extrabold">€{{ "%.2f"|format(grand_total) }}</p>
-            <p class="text-sm mt-2 font-bold">{{ location_label }}</p>
-          </div>
+      <div id="review-content" class="hidden space-y-4">
+
+  {% for item in items %}
+    <div class="bg-white border border-[#d6d6cc] p-4">
+      <div class="flex justify-between">
+        <div>
+          <h3 class="font-black uppercase text-[#2f3517]">{{ item.name }}</h3>
+          <p class="text-sm text-gray-500">Ποσότητα: {{ item.qty }}</p>
         </div>
+        <p class="font-bold">€{{ "%.2f"|format(item.total) }}</p>
+      </div>
+
+      {% if item.extras %}
+        <div class="mt-2 pt-2 border-t border-gray-100">
+          {% for extra in item.extras %}
+            <div class="text-xs flex justify-between text-gray-600 italic">
+              <span>{{ extra.group }}: {{ extra.val }}</span>
+              <span>+€{{ "%.2f"|format(extra.price) }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  <div class="mt-6 p-5 bg-[#556b2f] text-white text-center">
+    <p class="text-xs uppercase opacity-80">Γενικό Σύνολο</p>
+    <p class="text-3xl font-extrabold">€{{ "%.2f"|format(grand_total) }}</p>
+    <p class="text-sm mt-2 font-bold">Παράδοση: {{ location_label }}</p>
+  </div>
+
+</div>
 
       </div>
     </main>
   </div>
 </div>
+
+{% include "partials/footer.html" %}
 </body>
 </html>

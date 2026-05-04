@@ -12,16 +12,16 @@
       style="background-image: url('/static/bg.jpg');">
   <div class="min-h-screen bg-[rgba(243,243,241,0.50)]">
     <div id="page" class="flex flex-col">
-    <header class="bg-[#f3f3f1]">
+    <header class="bg-[#ffffff]">
   <div class="page-container py-8">
     <div class="flex items-center justify-center gap-4 md:gap-8">
       <img
         src="/static/29taxlogonoback.png"
         alt="29 Μ/Π ΤΑΞ Logo"
-        class="h-16 w-16 object-contain md:h-24 md:w-24"
+        class="h-16 w-14 object-contain md:h-24 md:w-24"
       />
 
-      <h1 class="main-title mb-0">
+      <h1 class="main-title mb-0 text-3xl">
         ΜΕΝΟΥ ΚΨΜ 29 Μ/Π ΤΑΞ
       </h1>
 
@@ -44,7 +44,7 @@
           {% for cat in categories %}
             <a
               href="#{{ cat.name |replace(' ', '-') }}"
-              class="category-button"
+              class="text-2xl category-button  cursor-pointer"
             >
               {{ cat.name }}
             </a>
@@ -57,22 +57,34 @@
           <section id="{{ cat.name|replace(' ', '-') }}" class="mb-14">
             <div class="category-header">
               <div class="category-line"></div>
-              <h2 class="category-title">
-                {{ cat.name }}
+              <h2 class="category-title text-2xl">
+                {{ cat.name }} 
               </h2>
             </div>
 
             <div class="product-grid">
               {% for product in cat.products %}
-                <button
+                <!-- <button
                   hx-get="/product-options/{{ product.id }}"
                   hx-target="#modal-body"
                   hx-swap="innerHTML"
                   onclick="document.getElementById('modal').style.display='flex'"
-                  class="product-card {% if not product.available %} cursor-not-allowed disabled {% endif %}"
-                >
+                  class="product-card {% if product.available %} cursor-pointer {% else %} cursor-not-allowed {% endif %}"
+                > -->
+                <button
+                      {% if product.available %}
+                        hx-get="/product-options/{{ product.id }}"
+                        hx-target="#modal-body"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('modal').style.display='flex'"
+                      {% else %}
+                        disabled
+                      {% endif %}
+                      class="product-card {% if product.available %}is-available{% else %}is-unavailable{% endif %}"
+                    >
+
                   <div class="product-top">
-                    <h3 class="product-name">
+                    <h3 class="product-name text-xl">
                       {{ product.name }}
                     </h3>
                     <span class="product-price">

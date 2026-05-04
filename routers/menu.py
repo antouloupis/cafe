@@ -4,21 +4,33 @@ from sqlmodel import Session, select
 from database import get_session
 from models import Product, Category, Order, OrderItem, OrderItemOption
 from utils import templates
+#from admin import CAFE_OPEN_STATUS 
 
 router = APIRouter(tags=["Menu"])
 
 cart = []
+
+# PROSWRINA
+CAFE_OPEN_STATUS = True
 
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request, db: Session = Depends(get_session)):
     categories = db.exec(select(Category)).all()
     # Group products by category
 
+    if not CAFE_OPEN_STATUS:
+            return templates.TemplateResponse(
+            name="closed.html",
+            request= request, 
+            status_code=503
+        )
+
+    # open case
     return templates.TemplateResponse(
-        request,
-        "menu.html",
-        {
-            "request": request,
+        name="menu.html",
+        request= request,
+        context={
+            
             "categories": categories,
             "title": "Coffee Menu",
             "cart": cart
@@ -64,12 +76,12 @@ async def add_to_cart(
     """
     <div class="text-center py-6 space-y-4">
         <div class="text-4xl">✅</div>
-        <p class="text-lg font-bold text-[#2f3517] uppercase">Added to cart</p>
+        <p class="text-xl font-bold text-[#2f3517] uppercase">Προστέθηκε στο καλάθι</p>
         <button
             type="button"
             onclick="document.getElementById('modal').style.display='none'"
-            class="bg-[#556b2f] text-white px-5 py-3 font-bold uppercase tracking-wider">
-            Close
+            class="bg-[#556b2f] text-white text-2xl px-5 py-3 font-bold uppercase tracking-wider cursor-pointer">
+            Κλείσιμο
         </button>
     </div>
     """,
@@ -134,11 +146,12 @@ async def place_order(
             "1": "1ο Γραφείο",
             "2": "2ο Γραφείο",
             "3": "3ο Γραφείο",
-            "4": "Γραφείο Έρευνας Πληροφορικής",
-            "5": "Υπασπιστήριο",
-            "6": "Επιτελάρχης",
-            "7": "Συντονιστής",
-            "8": "Υποδιοικητής",
+            "4": "4ο Γραφείο",
+            "5": "Γραφείο Έρευνας Πληροφορικής",
+            "6": "Υπασπιστήριο",
+            "7": "Επιτελάρχης",
+            "8": "Συντονιστής",
+            "9": "Υποδιοικητής",
         }
         location_label = location_map.get(location, location)
 
