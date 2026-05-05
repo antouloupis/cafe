@@ -12,11 +12,7 @@
     padding-inline: 1.5rem;
   }
 
-  @media (min-width: 768px) {
-    .page-container {
-      padding-inline: 2.5rem;
-    }
-  }
+
 
   .main-title {
     color: #4b5320;

@@ -4,21 +4,18 @@ from sqlmodel import Session, select
 from database import get_session
 from models import Product, Category, Order, OrderItem, OrderItemOption
 from utils import templates
-#from admin import CAFE_OPEN_STATUS 
+from constants import CAFE_STATE
 
 router = APIRouter(tags=["Menu"])
 
 cart = []
-
-# PROSWRINA
-CAFE_OPEN_STATUS = True
 
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request, db: Session = Depends(get_session)):
     categories = db.exec(select(Category)).all()
     # Group products by category
 
-    if not CAFE_OPEN_STATUS:
+    if not CAFE_STATE["is_open"]:
             return templates.TemplateResponse(
             name="closed.html",
             request= request, 
@@ -134,111 +131,84 @@ async def show_cart(request: Request, db: Session = Depends(get_session)):
 async def place_order(
     request: Request,
     location: str = Form(...),
+    comment: str = Form(None),  # Add this to catch the textarea input
     db: Session = Depends(get_session)
 ):
-    # 1. Validation check
     if not cart:
         return HTMLResponse("<p class='text-center py-10'>Το καλάθι είναι άδειο 🥲</p>")
 
     try:
-        # 2. Map the location ID to a human-readable label
         location_map = {
-            "1": "1ο Γραφείο",
-            "2": "2ο Γραφείο",
-            "3": "3ο Γραφείο",
-            "4": "4ο Γραφείο",
-            "5": "Γραφείο Έρευνας Πληροφορικής",
-            "6": "Υπασπιστήριο",
-            "7": "Επιτελάρχης",
-            "8": "Συντονιστής",
+            "1": "1ο Γραφείο", "2": "2ο Γραφείο", "3": "3ο Γραφείο",
+            "4": "4ο Γραφείο", "5": "Γραφείο Έρευνας Πληροφορικής",
+            "6": "Υπασπιστήριο", "7": "Επιτελάρχης", "8": "Συντονιστής",
             "9": "Υποδιοικητής",
         }
         location_label = location_map.get(location, location)
 
-        # 3. Initialize the Order (The Parent)
-        new_order = Order(location=location_label, status="pending")
+        # 1. Include the comments here during initialization
+        new_order = Order(
+            location=location_label, 
+            status="pending", 
+            comment=comment, # Save the textarea content
+            total=0.0          # Placeholder
+        )
         db.add(new_order)
-        
-        # Flush sends the object to the DB to get an ID without committing yet
         db.flush() 
 
         grand_total = 0.0
-        template_items = []
 
-        # 4. Process each item in the cart
         for item in cart:
             product = db.get(Product, item["id"])
-            if not product:
-                continue
+            if not product: continue
 
             base_price = float(product.price)
             item_unit_price = base_price
 
-            # Create the OrderItem snapshot
             order_item = OrderItem(
                 name=product.name,
                 price=base_price,
                 quantity=item["qty"],
-                order_id=new_order.id
+                order_id=new_order.id,
+                total=base_price
             )
             db.add(order_item)
-            db.flush() # Get order_item.id for the options
+            db.flush()
 
-            current_extras_for_template = []
-
-            # 5. Process selected extras
             if "extras" in item and item["extras"]:
                 for extra_id in item["extras"]:
-                    # Match selected extra ID against product's relationship
                     extra = next((opt for opt in product.options if opt.id == extra_id), None)
                     if extra:
                         item_unit_price += float(extra.extra_price)
-                        
-                        # Create permanent record of the selected option
                         db.add(OrderItemOption(
                             order_item_id=order_item.id,
                             group_name=extra.group_name,
                             value=extra.value,
                             extra_cost=extra.extra_price
                         ))
-                        
-                        # Data for the success template review
-                        current_extras_for_template.append({
-                            "group": extra.group_name,
-                            "val": extra.value,
-                            "price": float(extra.extra_price)
-                        })
 
+            order_item.total = item_unit_price
             item_total = item_unit_price * item["qty"]
             grand_total += item_total
-            
-            # Pack item data for the UI
-            template_items.append({
-                "name": product.name,
-                "qty": item["qty"],
-                "extras": current_extras_for_template,
-                "total": item_total
-            })
 
-        # 6. Finalize Transaction
+        # 2. Update the parent order with the final calculated total
+        new_order.total = grand_total
+        
+        # 3. Finalize Transaction
         db.commit()
         
-        # 7. Clear the session/global cart
         cart.clear()
 
-        # 8. Return the partial template
         response = Response(status_code=204)
         response.set_cookie(key="last_order_id", value=str(new_order.id), max_age=3600)
         response.headers["HX-Redirect"] = "/order-complete"
-
         return response
 
     except Exception as e:
-        # If anything fails in the loop, undo every single DB addition made above
         db.rollback()
         print(f"DATABASE ERROR: {e}")
         return HTMLResponse(
-            "<div class='bg-red-100 p-4 text-red-700'>Σφάλμα κατά την καταχώρηση. Παρακαλώ δοκιμάστε ξανά.</div>", 
+            "<div class='bg-red-100 p-4 text-red-700'>Σφάλμα κατά την καταχώρηση.</div>", 
             status_code=500
         )
     

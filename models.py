@@ -40,6 +40,8 @@ class Order(SQLModel, table=True):
         default_factory=lambda: datetime.now(timezone.utc)
     )
     items: List["OrderItem"] = Relationship(back_populates="order")
+    comment: Optional[str] = Field(default=None)
+    total: float = Field(ge=0)
 
 class OrderItem(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -49,13 +51,14 @@ class OrderItem(SQLModel, table=True):
     order_id: int = Field(foreign_key="order.id")
     order: "Order" = Relationship(back_populates="items")
     options: List["OrderItemOption"] = Relationship(back_populates="order_item")
+    total: float = Field(ge=0)
 
 class OrderItemOption(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     order_item_id: int = Field(foreign_key="orderitem.id")
     group_name: str
     value: str
-    extra_cost: int
+    extra_cost: float = Field(ge=0)
     order_item: OrderItem = Relationship(back_populates="options")
 
     #admin

@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Depends, Form, Request, HTTPException, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
-from sqlmodel import Session, select, SQLModel, col
+from sqlmodel import Session, select, SQLModel, col, delete
 from database import get_session
 from models import Category, Product, ProductOption, AdminUser, Order, OrderItem, OrderItemOption
 from utils import hash_password, templates
 from typing import List
+from datetime import datetime, timedelta, timezone
+from collections import defaultdict
+from sqlalchemy.orm import selectinload
+from constants import CAFE_STATE
 
 # We don't use a strict prefix here because /login and /logout sit at the root level,
 # but we will manually prefix the inventory routes with /admin/
@@ -13,15 +17,21 @@ router = APIRouter(tags=["Admin"])
 class PasswordChangeSchema(SQLModel):
     new_password: str
 
-CAFE_OPEN_STATUS = False
 
 # --- TOGGLE CAFE OPEN ---
 @router.post("/admin/toggle-cafe")
-def toggle_cafe(request : Request):
-    check_admin(request)
-    global CAFE_OPEN_STATUS
-    CAFE_OPEN_STATUS = not CAFE_OPEN_STATUS
-    return HTMLResponse("Open" if CAFE_OPEN_STATUS else "Closed")
+def toggle_cafe(request: Request):
+    # Toggle the boolean inside the shared dictionary
+    CAFE_STATE["is_open"] = not CAFE_STATE["is_open"]
+    
+    status_text = "ΑΝΟΙΧΤΟ" if CAFE_STATE["is_open"] else "ΚΛΕΙΣΤΟ"
+    dot_color = "bg-green-500" if CAFE_STATE["is_open"] else "bg-red-500"
+    
+    # Return the HTML for your HTMX swap
+    return HTMLResponse(content=f'''
+        <div class="h-3 w-3 rounded-full {dot_color}"></div>
+        <span class="text-xs font-black uppercase text-white">{status_text}</span>
+    ''')
 
 # --- AUTH & DASHBOARD ---
 
@@ -32,7 +42,10 @@ async def admin_dashboard(request: Request, db: Session = Depends(get_session)):
         return templates.TemplateResponse(request=request, name="login.html")
     products = db.exec(select(Product)).all()
     categories = db.exec(select(Category)).all()
-    return templates.TemplateResponse(request=request, name="product_admin.html", context={"title": "Admin Dashboard", "products": products, "categories": categories})
+    return templates.TemplateResponse(
+        request=request,
+        name="product_admin.html",
+        context={"title": "Admin Dashboard", "products": products, "categories": categories, "CAFE_STATUS": CAFE_STATE["is_open"]})
 
 @router.post("/login")
 async def login_post(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_session)):
@@ -294,7 +307,9 @@ async def admin_orders(
     status: str = "pending", 
     db: Session = Depends(get_session)
 ):
-    check_admin(request)
+    session_cookie = request.cookies.get("kylikeio_session")
+    if not session_cookie:
+        return templates.TemplateResponse(request=request, name="login.html")
     # Base Query with Descending Order
     query = select(Order).order_by(col(Order.created_at).desc())
     
@@ -330,7 +345,7 @@ async def admin_orders(
         request=request
     )
 
-@router.post("/admin/order/{order_id}/status")
+@router.post("/admin/order/{order_id}/change_status")
 async def change_order_status(
     request: Request,
     order_id:int,
@@ -356,15 +371,60 @@ async def change_order_status(
     elif current_filter == "canceled":
         query = query.where(Order.status == "canceled")
 
-    orders = db.exec(query).all()
 
+    return HTMLResponse(
+            content="""
+            <div class="text-gray-400 text-center my-auto">Επέλεξε παραγγελία για να δείς λεπτομέρειες</div>
+            """,
+            headers={"HX-Trigger": "orderChanged"}
+        )
 
+@router.get("/admin/order/{order_id}/details")
+async def get_order_details(request: Request,order_id: int, db: Session = Depends(get_session)):
+    # 1. Fetch Order + Items + Options in one query
+    statement = (
+        select(Order)
+        .where(Order.id == order_id)
+        .options(selectinload(Order.items).selectinload(OrderItem.options))
+    )
+    order_obj = db.exec(statement).first()
+
+    if not order_obj:
+        return HTMLResponse("Order not found", status_code=404)
+
+    # 2. Group options by category (group_name)
+    display_items = []
+    for item in order_obj.items:
+        grouped = defaultdict(list)
+        for opt in item.options:
+            grouped[opt.group_name].append(opt.value)
+        
+        display_items.append({
+            "name": item.name,
+            "quantity": item.quantity,
+            "grouped_options": dict(grouped)
+        })
+
+    # 3. Return only the relevant data
     return templates.TemplateResponse(
-        name="partials/admin_orders_list.html",
-        context={
-            "orders": orders,
-            "current_status": current_filter
-        },
-        request=request
+        name="partials/admin_selected_order.html",  # Explicitly name the template
+        request=request,
+        context={ 
+            "selected_order": order_obj, 
+            "display_items": display_items
+        }
     )
 
+
+def delete_old_orders(db: Session):
+    # Calculate the date 7 days ago
+    # We use UTC to avoid timezone headaches
+    threshold = datetime.now(timezone.utc) - timedelta(days=7)
+    
+    # Define the delete statement
+    statement = delete(Order).where(Order.created_at < threshold)
+    
+    # Execute and commit
+    result = db.exec(statement)
+    db.commit()
+    return result.rowcount

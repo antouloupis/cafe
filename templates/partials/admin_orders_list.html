@@ -14,7 +14,7 @@
 
         <!-- SECTION 2: The Immediate Actions -->
         <div class="p-4 flex flex-col justify-center border-l">
-            <button hx-post="/admin/order/{{ order.id }}/status?new_status=completed&current_filter={{ current_status }}"
+            <button hx-post="/admin/order/{{ order.id }}/change_status?new_status=completed&current_filter={{ current_status }}"
                     hx-target="#admin-orders-list"
                     class="bg-[#556b2f] text-white px-3 py-1 text-xs font-bold mb-1">
                 DONE
@@ -23,6 +23,6 @@
     </article>
 {% else %}
     <div class="p-8 text-center text-gray-400 italic">
-        No pending orders. Take a break!
+        Οι νέες παραγγελίες θα εμφανιστούν εδώ
     </div>
 {% endfor %}

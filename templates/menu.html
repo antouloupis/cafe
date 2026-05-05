@@ -10,29 +10,28 @@
 
 <body class="text-[#4b5320] bg-cover bg-center bg-fixed"
       style="background-image: url('/static/bg.jpg');">
-  <div class="min-h-screen bg-[rgba(243,243,241,0.50)]">
+  <div class="min-h-screen flex flex-col bg-white/15">
     <div id="page" class="flex flex-col">
-    <header class="bg-[#ffffff]">
-  <div class="page-container py-8">
-    <div class="flex items-center justify-center gap-4 md:gap-8">
-      <img
-        src="/static/29taxlogonoback.png"
-        alt="29 Μ/Π ΤΑΞ Logo"
-        class="h-16 w-14 object-contain md:h-24 md:w-24"
-      />
+      <header class="bg-white/50 flex gap-4 md:gap-8">
+        <img
+          src="/static/29taxlogonoback.png"
+          alt="29 Μ/Π ΤΑΞ Logo"
+          class="h-16 w-14 object-contain md:h-24 md:w-24"
+        />
+        <div class="flex flex-col">
+        <h1 class="main-title text-3xl ">
+          ΜΕΝΟΥ ΚΨΜ 29 Μ/Π ΤΑΞ
+        </h1>
+        <a 
+        href="/admin"
+        class="cursor-pointer bg-[#556b2f] hover:bg-[#3f471f] text-white
+        font-black px-4 rounded-lg shadow-lg transform active:scale-[0.98] transition-all uppercase">
+        Σύνδεση διαχειριστή
+        </a>
+      </div>
+      </div>
 
-      <h1 class="main-title mb-0 text-3xl">
-        ΜΕΝΟΥ ΚΨΜ 29 Μ/Π ΤΑΞ
-      </h1>
-
-      <img
-        src="/static/geslogonoback.png"
-        alt="ΓΕΣ Logo"
-        class="h-16 w-16 object-contain md:h-24 md:w-24"
-      />
-    </div>
-  </div>
-</header>
+      </header>
 
     <!-- Main -->
     <main class="flex-1">
@@ -101,14 +100,14 @@
     </main>
 
     <!-- Fixed Cart Button -->
-    <div class="cart-button-wrapper cursor-not-allowed" id="cart-wrapper">
+    <div id="cart-wrapper" class="cart-button-wrapper {% if not cart %}cursor-not-allowed{% endif %}">
       <a 
         id="cart-btn"
         href="/cart" 
-        class="cart-button {% if not cart %}grayscale pointer-events-none{% endif %}"
+        class="cart-button {% if not cart %}grayscale pointer-events-none border-black{% endif %} flex items-center justify-center p-3 border-r-8 border-lime-800 bg-[#556b2f] text-white font-bold transition-all"
       >
         <span id="cart-text">
-          {% if cart %}🛒 Συνέχεια Παραγγελίας{% else %}🛒 Άδειο{% endif %}
+          {% if cart %}🛒 Προβολή καλαθιού{% else %}🛒 Άδειο{% endif %}
         </span>
       </a>
     </div>
@@ -130,22 +129,29 @@
   {% include "partials/footer.html" %}
 </body>
 <script>
-  document.body.addEventListener('htmx:afterRequest', function(evt) {
+document.body.addEventListener('htmx:afterRequest', function(evt) {
+    // Only trigger if the request was an "add to cart" action
     if (evt.detail.requestConfig.path.includes('/add-to-cart/')) {
         const cartBtn = document.getElementById('cart-btn');
         const cartText = document.getElementById('cart-text');
         const cartWrap = document.getElementById('cart-wrapper');
 
-        cartBtn.classList.remove('pointer-events-none', 'grayscale');
+        // 1. Enable the wrapper (Remove cursor-not-allowed)
         cartWrap.classList.remove('cursor-not-allowed');
+
+        // 2. Enable the button (Remove grayscale and pointer restriction)
+        cartBtn.classList.remove('pointer-events-none', 'grayscale');
+
+        // 3. Update the text
         cartText.innerText = '🛒 Προβολή καλαθιού';
         
+        // 4. Feedback Animation
         cartBtn.animate([
             { transform: 'scale(1)' },
-            { transform: 'scale(1.1)' },
+            { transform: 'scale(1.05)' },
             { transform: 'scale(1)' }
-        ], { duration: 300 });
+        ], { duration: 300, easing: 'ease-out' });
     }
-});
-</script>
+  });
+  </script>
 </html>

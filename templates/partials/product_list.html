@@ -1,7 +1,7 @@
 <div id="management" class="flex py-4 gap-5">
 <div>
 {% if products %}
-<div class="grid grid-cols-[1.5fr_1.5fr_0.5fr_1fr_2fr] bg-zinc-800 text-white font-bold">
+<div class="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_2fr] bg-zinc-800 text-white font-bold">
     <div class="p-3 border-r border-zinc-800">Προϊόν</div>
     <div class="p-3 border-r border-zinc-800">Κατηγορία</div>
     <div class="p-3 border-r border-zinc-800 text-center">Τιμή</div>
@@ -9,11 +9,11 @@
     <div class="p-3 border-r border-zinc-800">Ενέργειες</div>
   </div>
 
-{% for product in products %}
-    <div id="product-row-{{ product.id }}" class="grid grid-cols-[1.5fr_1.5fr_0.5fr_1fr_2fr]">
+{% for product in products | sort(attribute='category.name') %}
+    <div id="product-row-{{ product.id }}" class="grid grid-cols-[1.5fr_1.5fr_1fr_1fr_2fr]">
         <div class="p-3 border-x border-b border-zinc-800 flex"><span class="my-auto">{{product.name}}</span></div>
         <div class="p-3 border-r border-b border-zinc-800 flex"><span class="my-auto">{{product.category.name}}</span></div>
-        <div class="p-3 border-r border-b border-zinc-800 flex"><span  class="my-auto">{{product.price}} €</span></div>
+        <div class="p-3 border-r border-b border-zinc-800 flex"><span  class="m-auto">{{product.price}} €</span></div>
         <div class="p-3 border-r border-b border-zinc-800 flex">
             <input 
                 type="checkbox" 
@@ -47,7 +47,7 @@
 
 
 {% else %}
-    <p>No products in the database yet.</p>
+    <p>Κανένα προϊόν δεν έχει δημιουργηθεί.</p>
 {% endif %}
 
         <button hx-get="/admin/product/create" 

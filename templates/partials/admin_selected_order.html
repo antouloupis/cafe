@@ -1,0 +1,61 @@
+<section class="h-full flex flex-col w-2/3">
+    <!-- 1. Header: Order ID & Location -->
+    <header class="border-b-4 border-[#556b2f] pb-4 mb-6">
+        <div class="flex justify-between items-start">
+            <div>
+                <h2 class="text-2xl font-black">Παραγγελία #{{ selected_order.id }}</h2>
+                <p class="text-lg font-semibold">
+                    📍 {{ selected_order.location }}
+                </p>
+            </div>
+            <p class="font-black text-xl text-gray-600 my-auto">
+            Σύνολο: {{selected_order.total}} €
+            </p>
+        </div>
+    </header>
+
+    <!-- 2. The Items List -->
+<div class="space-y-6">
+    {% for item in selected_order.items %}
+        <article class="bg-white p-5 rounded border-l-8 border-[#556b2f] border shadow-sm">
+            <!-- Main Item Header -->
+            <div class="flex justify-between gap-4">
+                <span class="text-lg font-bold">{{ item.name }}</span>
+                <div class="flex gap-2">
+                <span class="font-bold bg-sky-300 rounded px-3">Ποσότητα: x {{item.quantity}}</span>
+                <span class="font-bold bg-lime-300 rounded px-2">{{item.total}} €</span>
+                </div>
+
+            </div>
+            {% if item.options %}
+            <div class="flex gap-3 flex-wrap mt-3">
+                {% for option in item.options %}
+                <span class="bg-amber-200 rounded-full p-1 px-3 text-sm rounded font-semibold">{{option.value}} {% if option.extra_cost >0 %}(+{{option.extra_cost}} €){% endif %}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </article>
+    {% endfor %}
+</div>
+
+    <!-- 4. Massive Footer Action -->
+{% if request.url.path == '/orders?status=pending' %}
+    <footer class="mt-8 pt-6 border-t flex gap-x-10 justify-center">
+        <button hx-post="/admin/order/{{ selected_order.id }}/change_status?new_status=completed"
+                hx-target="#detail-pane"
+                class="w-1/3 bg-[#556b2f] hover:bg-green-800 text-white text-xl font-black rounded-xl shadow-lg transition-transform hover:scale-95">
+            Ολοκλήρωση
+        </button>
+        <button 
+                hx-post="/admin/order/{{ selected_order.id }}/change_status?new_status=cancelled"
+                hx-target="#detail-pane"
+                class="w-1/4 bg-red-700 hover:bg-red-800 text-white py-6 text-xl font-black rounded-xl shadow-lg transition-transform hover:scale-95">
+            Ακύρωση
+        </button>
+    </footer>
+{% endif %}
+</section>
+<section class="w-1/3 border border-3 border-dotted mb-auto p-3 border-[#556b2f] bg-gray-100">
+    <h2 class="text-2xl font-black text-center">Σχόλια παραγγελίας:</h2>
+    <div class="mx-auto mt-3 bg-white italic tracking-wider">" {{selected_order.comment}} "</div>
+</section>

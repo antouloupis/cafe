@@ -3,9 +3,9 @@
 {% block content %}
 <!-- Filter Tabs -->
 <div class="flex gap-2 mb-6">
-    <a href="?status=pending" class="px-4 py-2 {% if current_status == 'pending' %}bg-[#556b2f] text-white{% else %}bg-white{% endif %}">Active</a>
-    <a href="?status=completed" class="px-4 py-2 {% if current_status == 'completed' %}bg-[#556b2f] text-white{% else %}bg-white{% endif %}">Completed</a>
-    <a href="?status=all" class="px-4 py-2 {% if current_status == 'all' %}bg-[#556b2f] text-white{% else %}bg-white{% endif %}">History</a>
+    <a href="?status=pending" class="px-4 py-2 {% if current_status == 'pending' %}bg-[#556b2f] text-white{% else %}bg-white{% endif %}">Νέες</a>
+    <a href="?status=completed" class="px-4 py-2 {% if current_status == 'completed' %}bg-[#556b2f] text-white{% else %}bg-white{% endif %}">Ολοκληρωμένες</a>
+    <a href="?status=all" class="px-4 py-2 {% if current_status == 'all' %}bg-[#556b2f] text-white{% else %}bg-white{% endif %}">Ιστορικό</a>
 </div>
 
 <div class="flex gap-10 justify-between px-5">
@@ -13,34 +13,14 @@
     <div id="admin-orders-list"
         class="flex-grow overflow-y-auto"
         hx-get="/admin/orders?status={{ current_status }}" 
-        hx-trigger="every 10s"
+        hx-trigger="orderChanged from:body, every 10s"
         hx-swap="innerHTML">
         {% include "partials/admin_orders_list.html" %}
     </div>
 </section>
-<section id="detail-pane" class="w-full">
-    <div class="text-gray-400">Select an order to view details</div>
+<section id="detail-pane" class="flex w-full gap-5">
+    <div class="text-gray-400 text-center my-auto">Επέλεξε παραγγελία για να δείς λεπτομέρειες</div>
 </section>
 </div>
 
 {% endblock content %}
-<!-- 
-<div class="overflow-x-auto bg-white shadow-md">
-    <table class="w-full text-left">
-        <thead class="bg-gray-100 uppercase text-xs font-bold">
-            <tr>
-                <th class="p-4">ID</th>
-                <th class="p-4">Ώρα</th>
-                <th class="p-4">Παράδοση</th>
-                <th class="p-4">Προϊόντα</th>
-                <th class="p-4">Κατάσταση</th>
-                <th class="p-4">Ενέργειες</th>
-            </tr>
-        </thead>
-        <tbody id="admin-orders-list" 
-               hx-get="/admin/orders?status={{ current_status }}" 
-               hx-trigger="every 10s" 
-               hx-swap="innerHTML">
-        </tbody>
-    </table>
-</div> -->

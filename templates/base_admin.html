@@ -6,10 +6,52 @@
     <link href="/static/output.css" rel="stylesheet">
     {% block head %}{% endblock %} 
 </head>
-    <nav class="w-full p-5 justify-between flex bg-lime-950">
-        <h1 class="font-light text-2xl text-white text-bold">Σελίδα διαχείρισης κυλικείου</h1>
-        <a href="/logout" class="bg-emerald-400 hover:bg-zinc-400 p-2 hover:border-blue-500 rounded font-bold">Αποσύνδεση</a>
-    </nav>
+<nav class="bg-[#2f3517] text-white shadow-md w-full">
+    <div class="max-w-full mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
+            
+            <!-- Left Side: Branding and Primary Links -->
+            <div class="flex items-center gap-8">
+                <div class="flex-shrink-0">
+                    <span class="text-xl font-black tracking-tighter uppercase pointer-events-none">
+                        29 Μ/Π ΤΑΞ <span class="text-[#c5d1ad]">ADMIN</span>
+                    </span>
+                </div>
+                
+                <div class="flex items-baseline gap-4">
+                    <a href="/admin/orders" 
+                       class="px-4 py-2 rounded-md text-sm font-bold uppercase transition-colors
+                              {% if request.url.path == '/admin/orders' %} bg-[#556b2f] text-white {% else %} text-gray-300 hover:bg-[#3f471f] hover:text-white {% endif %}">
+                        ΠΑΡΑΓΓΕΛΙΕΣ
+                    </a>
+                    
+                    <a href="/admin" 
+                       class="px-4 py-2 rounded-md text-sm font-bold uppercase transition-colors
+                              {% if request.url.path == '/admin' %} bg-[#556b2f] text-white {% else %} text-gray-300 hover:bg-[#3f471f] hover:text-white {% endif %}">
+                        ΠΡΟΪΟΝΤΑ
+                    </a>
+                    <a href="/" 
+                       class="px-4 py-2 rounded-md text-sm font-bold uppercase transition-colors
+                              text-gray-300 hover:bg-[#3f471f] hover:text-white">
+                        ΜΕΝΟΥ
+                    </a>
+                </div>
+            </div>
+
+            <div id="cafe-status-ui" 
+                hx-post="/admin/toggle-cafe" 
+                hx-trigger="click" 
+                class="cursor-pointer hover:bg-stone-600/60 flex items-center gap-2 bg-black/20 px-4 py-2 rounded-full border-2 border-olive-400">
+                
+                <div class="h-3 w-3 rounded-full {% if CAFE_STATUS %} bg-green-500 {% else %} bg-red-500 {% endif %}"></div>
+                <span class="text-xs font-black uppercase text-white">
+                    {{ 'ΑΝΟΙΧΤΟ' if CAFE_STATUS else 'ΚΛΕΙΣΤΟ' }}
+                </span>
+            </div>
+
+        </div>
+    </div>
+</nav>
 <body>
 <div id="modal-container"></div>
 <main class="flex flex-col h-screen">

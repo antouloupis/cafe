@@ -16,7 +16,7 @@
       <div class="page-container py-8">
         <div class="flex items-center justify-center gap-4 md:gap-8">
           <img src="/static/29taxlogonoback.png" alt="Logo" class="h-16 w-14 md:h-24 md:w-24 object-contain" />
-          <h1 class="main-title mb-0">ΚΑΛΑΘΙ ΠΑΡΑΓΓΕΛΙΑΣ</h1>
+          <h1 class="main-title text-3xl  mb-0">ΚΑΛΑΘΙ ΠΑΡΑΓΓΕΛΙΑΣ</h1>
           <img src="/static/geslogonoback.png" alt="Logo" class="h-16 w-16 md:h-24 md:w-24 object-contain" />
         </div>
       </div>
@@ -74,9 +74,10 @@
           </div>
 
           <!-- Totals & Location -->
-          <div class="max-w-5xl mx-auto mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="max-w-5xl mx-auto mt-8 grid grid-cols-3 gap-3">
              <div class="bg-[#f8f8f6] border border-[#d6d6cc] p-6 text-left">
-                <label class="block text-xl font-bold uppercase mb-3">Τοποθεσία Παράδοσης</label>
+              <div>
+                <label class="block text-xl font-bold mb-3">Τοποθεσία Παράδοσης</label>
                 <select id="delivery-location" name="location" class="w-full border p-4 text-xl font-semibold cursor-pointer">
                     <option value="1">1ο Γραφείο</option>
                     <option value="2">2ο Γραφείο</option>
@@ -88,19 +89,34 @@
                     <option value="8">Συντονιστής</option>
                     <option value="9">Υποδιοικητής</option>                    
                 </select>
+              </div>
              </div>
              <div class="bg-[#556b2f] text-white p-6 shadow-lg">
                 <p class="uppercase text-white/80">Γενικό Σύνολο</p>
                 <p class="text-4xl font-extrabold">€{{ "%.2f"|format(grand_total) }}</p>
                 <div class="mt-6 flex gap-3">
-                   <button hx-post="/place-order" hx-target="#page" hx-include="#delivery-location " 
+                   <button hx-post="/place-order" hx-target="#page" hx-include="#delivery-location,#comment" 
                            class="bg-white text-[#556b2f] px-6 py-3 font-bold uppercase flex-1 cursor-pointer">✅ Καταχώρηση</button>
-                   <button onclick="window.location='/'" class="border border-white px-9 py-5 font-bold uppercase cursor-pointer">Πίσω στο Μενού</button>
+                   <a href="/" class="border border-white px-9 py-5 font-bold uppercase cursor-pointer">Πίσω στο Μενού</a>
                 </div>
              </div>
-          </div
+          <div class="mt-6 space-y-2">
+              <label class="text-xs font-black uppercase text-gray-400 tracking-widest ml-1">
+                  Σχόλια / Ειδικές Οδηγίες
+              </label>
+              <textarea 
+                  name="comment"
+                  id="comment"
+                  placeholder="π.χ. Χωρίς κρεμμύδι, επιπλέον χαρτοπετσέτες..."
+                  class="w-full min-h-[120px] p-4 bg-gray-50 border-2 border-gray-200 rounded-xl 
+                        text-gray-800 font-medium outline-none transition-all
+                        focus:border-[#556b2f] focus:bg-white focus:ring-4 focus:ring-[#556b2f]/10
+                        resize-none placeholder:text-gray-400"
+              ></textarea>
+          </div>
+        </div>
         {% endif %}
-      </div>
+        </div>
     </main>
   </div>
 </div>
