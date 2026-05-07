@@ -29,7 +29,7 @@ async def home(request: Request, db: Session = Depends(get_session)):
         context={
             
             "categories": categories,
-            "title": "Coffee Menu",
+            "title": "ΜΕΝΟΥ ΚΨΜ 29 Μ/Π ΤΑΞ",
             "cart": cart
         }
     )
@@ -118,7 +118,8 @@ async def show_cart(request: Request, db: Session = Depends(get_session)):
         "request": request,
         "cart_items": cart_items,
         "grand_total": grand_total,
-        "cart": cart
+        "cart": cart,
+        "title": "Καλάθι Παραγγελίας"
     }
 
     return templates.TemplateResponse(
@@ -126,6 +127,11 @@ async def show_cart(request: Request, db: Session = Depends(get_session)):
       name="partials/cart_page.html",
       context=context
     )
+
+    # to thelw 
+    response.headers["Cache-Control"] = "no-store" 
+
+    return response
 
 @router.post("/place-order")
 async def place_order(
@@ -250,9 +256,12 @@ async def show_order_complete(request: Request, db: Session = Depends(get_sessio
             "items": template_items,
             "grand_total": grand_total,
             "location_label": order.location,
-            "order": order
+            "order": order,
+            "title": "Τέλος Παραγγελίας"
         }
     )
+
+
 
 @router.post("/remove-from-cart/{product_id}")
 async def remove_from_cart(

@@ -6,6 +6,8 @@
   <title>{{ title }}</title>
   <link rel="stylesheet" href="/static/output.css" />
   <script src="/static/htmx.min.js"></script>
+  <link rel="icon" type="image/png" href="/static/29taxlogo.png">
+  <!-- <title>Καλάθι Παραγγελίας</title> -->
 </head>
 <body class="cart-page text-[#4b5320] bg-cover bg-center bg-fixed">
 
@@ -141,6 +143,8 @@
 {% if not request.headers.get("HX-Request") %}
   {% include "partials/footer.html" %}
 {% endif %}
+
+
 
 </body>
 

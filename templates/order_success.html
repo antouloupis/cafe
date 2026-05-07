@@ -6,7 +6,8 @@
   <title>{{ title }}</title>
   <link rel="stylesheet" href="/static/output.css" />
   <script src="/static/htmx.min.js"></script>
-
+<link rel="icon" type="image/png" href="/static/29taxlogo.png">
+<!-- <title>Τέλος Παραγγελίας</title> -->
 </head>
 <body class="success-page text-[#4b5320] bg-cover bg-center bg-fixed"
       style="background-image: url('/static/bg.jpg');">
@@ -105,5 +106,15 @@
     </div>
   </div>
   {% include "partials/footer.html" %}
+
+
+<script>
+  history.pushState({ page: "success" }, "", window.location.href);
+
+  window.addEventListener("popstate", function () {
+    window.location.replace("/");
+  });
+</script>
+
 </body>
 </html>
