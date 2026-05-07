@@ -6,41 +6,51 @@
   <title>{{ title }}</title>
   <link rel="stylesheet" href="/static/output.css" />
   <script src="/static/htmx.min.js"></script>
+
 </head>
-<body class="text-[#4b5320] bg-cover bg-center bg-fixed"
+<body class="success-page text-[#4b5320] bg-cover bg-center bg-fixed"
       style="background-image: url('/static/bg.jpg');">
 
 <div id="page" class="min-h-screen flex flex-col bg-cover bg-center bg-fixed" style="background-image: url('/static/bg.jpg');">
-  <div class="min-h-screen bg-[rgba(243,243,241,0.50)]">
-    
-    <header class="bg-[#ffffff]">
-      <div class="page-container py-8 flex items-center justify-center gap-8">
-          <img src="/static/29taxlogonoback.png" class="h-16 w-16 md:h-24 md:w-24 object-contain" />
-          <h1 class="main-title text-3xl mb-0">ΤΕΛΟΣ ΠΑΡΑΓΓΕΛΙΑΣ</h1>
-          <img src="/static/geslogonoback.png" class="h-16 w-18 md:h-24 md:w-24 object-contain" />
-      </div>
-    </header>
+  <div class="min-h-screen bg-white/15">
+
+<header class="bg-[#556b2f]">
+  <div class="px-4 py-2 flex items-center justify-between">
+
+    <!-- Left: Title -->
+    <h1 class="main-title text-3xl text-white ml-20">
+      ΤΕΛΟΣ ΠΑΡΑΓΓΕΛΙΑΣ
+    </h1>
+
+    <!-- Right: Button + Logo -->
+    <div class="flex items-center gap-3">
+      <img
+        src="/static/29taxlogo.png"
+        alt="Logo"
+        class="h-16 w-14 md:h-24 md:w-24 object-contain"
+      />
+    </div>
+
+  </div>
+</header>
 
     <main class="page-container pt-10 pb-24">
-        <div class="max-w-4xl mx-auto flex flex-col space-y-20">
+        <div class="max-w-3xl mx-auto flex flex-col space-y-10">
 
         <!-- Left Column: Animation -->
-        <div class="bg-[#f8f8f6] border border-[#d6d6cc] shadow-sm p-10 text-center flex flex-col justify-center">
+        <div class="bg-[#ffffff]  shadow-sm p-4 text-center flex flex-col justify-center">
           <div class="text-5xl mb-4">✅</div>
-          <h2 class="text-3xl font-extrabold uppercase text-[#2f3517]">Η παραγγελία καταχωρήθηκε!</h2>
+          <h2 class="text-3xl font-extrabold uppercase text-[#000000]">Η παραγγελία καταχωρήθηκε!</h2>
           
-          <div class="mt-8 relative w-full max-w-md mx-auto h-32 border-y border-dashed border-[#b8b8ae] overflow-hidden">
-            
-            <!-- ground line -->
-            <div class="absolute bottom-4 left-0 right-0 h-1 bg-[#7d8f61]"></div>
-            <!-- running soldier -->
-            <img 
-              src="/static/soldier-run.gif" 
-              class="absolute bottom-6 h-16 animate-run"
-            >
-           </div>
+     <div class="mt-8 relative w-full max-w-md mx-auto h-32 border-y border-solid border-[#ffffff] overflow-hidden">
+  
+    <img 
+      src="/static/tank1.gif" 
+      class="absolute bottom-0 h-35 animate-run"
+    >
+</div>
 
-          <button onclick="window.location='/'" class="mt-8 bg-[#556b2f] text-white px-6 py-3 font-bold uppercase cursor-pointer">
+          <button onclick="window.location='/'" class="mt-8 bg-[#556b2f] text-white text-2xl px-6 py-5 font-bold uppercase cursor-pointer">
               Επιστροφή στο Μενού
           </button>
         </div>
@@ -63,10 +73,10 @@
     <div class="bg-white border border-[#d6d6cc] p-4">
       <div class="flex justify-between">
         <div>
-          <h3 class="font-black uppercase text-[#2f3517]">{{ item.name }}</h3>
-          <p class="text-sm text-gray-500">Ποσότητα: {{ item.qty }}</p>
+          <h3 class="font-black text-xl uppercase text-[#2f3517]">{{ item.name }}</h3>
+          <p class="text-lg text-gray-500">Ποσότητα: {{ item.qty }}</p>
         </div>
-        <p class="font-bold">€{{ "%.2f"|format(item.total) }}</p>
+        <p class="font-bold text-lg">€{{ "%.2f"|format(item.total) }}</p>
       </div>
 
       {% if item.extras %}
@@ -82,10 +92,23 @@
     </div>
   {% endfor %}
 
-  <div class="mt-6 p-5 bg-[#556b2f] text-white text-center">
-    <p class="text-xs uppercase opacity-80">Γενικό Σύνολο</p>
+  {% if order.comment %}
+   <div class="mt-6 mb-9 bg-white border border-[#d6d6cc] p-5 text-left">
+    <p class="text-lg font-bold uppercase text-gray-500 mb-0">
+      Σχόλια / Ειδικές Οδηγίες </p>
+
+      
+  <p class="text-lg text-black font-extrabold">{{ order.comment }}</p>
+      <!-- <p class="text-lg text-black font-extrabold">{{ order.comment }}</p> -->
+  </div>
+    {% endif %}
+
+  
+
+  <div class="mt-6 p-5 text-[#556b2f] text-center">
+    <p class="text-xl uppercase opacity-80">Γενικό Σύνολο</p>
     <p class="text-3xl font-extrabold">€{{ "%.2f"|format(grand_total) }}</p>
-    <p class="text-sm mt-2 font-bold">Παράδοση: {{ location_label }}</p>
+    <p class="text-2xl mt-2 font-bold">Παράδοση: {{ location_label }}</p>
   </div>
 
 </div>

@@ -249,7 +249,8 @@ async def show_order_complete(request: Request, db: Session = Depends(get_sessio
         context={
             "items": template_items,
             "grand_total": grand_total,
-            "location_label": order.location
+            "location_label": order.location,
+            "order": order
         }
     )
 

@@ -4,4 +4,6 @@
 *.db
 tailwindcss.exe
 *.exe
+gif.gif
 static/output.css
+static/tank.gif

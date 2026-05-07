@@ -8,30 +8,38 @@
   <script src="/static/htmx.min.js"></script>
 </head>
 
-<body class="text-[#4b5320] bg-cover bg-center bg-fixed"
+<body class="menu-page text-[#4b5320] bg-cover bg-center bg-fixed"
       style="background-image: url('/static/bg.jpg');">
   <div class="min-h-screen flex flex-col bg-white/15">
     <div id="page" class="flex flex-col">
-      <header class="bg-white/50 flex gap-4 md:gap-8">
-        <img
-          src="/static/29taxlogonoback.png"
-          alt="29 Μ/Π ΤΑΞ Logo"
-          class="h-16 w-14 object-contain md:h-24 md:w-24"
-        />
-        <div class="flex flex-col">
-        <h1 class="main-title text-3xl ">
-          ΜΕΝΟΥ ΚΨΜ 29 Μ/Π ΤΑΞ
-        </h1>
-        <a 
-        href="/admin"
-        class="cursor-pointer bg-[#556b2f] hover:bg-[#3f471f] text-white
-        font-black px-4 rounded-lg shadow-lg transform active:scale-[0.98] transition-all uppercase">
-        Σύνδεση διαχειριστή
-        </a>
-      </div>
-      </div>
 
-      </header>
+
+  <header class="bg-[#556b2f]">
+  <div class="px-4 py-2 flex items-center justify-between">
+
+    <!-- Left: Title -->
+    <h1 class="main-title text-3xl text-white ml-20">
+      ΜΕΝΟΥ ΚΨΜ 29 Μ/Π ΤΑΞ
+    </h1>
+
+    <!-- Right: Button + Logo -->
+    <div class="flex items-center gap-3">
+      <a 
+        href="/admin"
+        class="bg-white text-lg text-black font-black px-4 py-2 rounded-lg shadow 
+               hover:bg-gray-200 transition-all uppercase">
+        Σύνδεση διαχειριστή
+      </a>
+
+      <img
+        src="/static/29taxlogo.png"
+        alt="Logo"
+        class="h-16 w-14 md:h-24 md:w-24 object-contain"
+      />
+    </div>
+
+  </div>
+</header>
 
     <!-- Main -->
     <main class="flex-1">
@@ -153,5 +161,7 @@ document.body.addEventListener('htmx:afterRequest', function(evt) {
         ], { duration: 300, easing: 'ease-out' });
     }
   });
-  </script>
+
+  
+</script>
 </html>
