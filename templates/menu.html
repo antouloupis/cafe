@@ -12,130 +12,111 @@
       style="background-image: url('/static/bg.jpg');">
   <div class="min-h-screen flex flex-col bg-white/15">
     <div id="page" class="flex flex-col">
+      <header class="bg-[#556b2f]">
+        <div class="px-4 py-2 flex items-center justify-between">
 
+          <h1 class="main-title text-3xl text-white ml-20">
+            ΜΕΝΟΥ ΚΨΜ 29 Μ/Π ΤΑΞ
+          </h1>
 
-  <header class="bg-[#556b2f]">
-  <div class="px-4 py-2 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <a 
+              href="/admin"
+              class="bg-white text-lg text-black font-black px-4 py-2 rounded-lg shadow 
+                    hover:bg-gray-200 transition-all uppercase">
+              Σελίδα διαχειριστή
+            </a>
 
-    <!-- Left: Title -->
-    <h1 class="main-title text-3xl text-white ml-20">
-      ΜΕΝΟΥ ΚΨΜ 29 Μ/Π ΤΑΞ
-    </h1>
-
-    <!-- Right: Button + Logo -->
-    <div class="flex items-center gap-3">
-      <a 
-        href="/admin"
-        class="bg-white text-lg text-black font-black px-4 py-2 rounded-lg shadow 
-               hover:bg-gray-200 transition-all uppercase">
-        Σύνδεση διαχειριστή
-      </a>
-
-      <img
-        src="/static/29taxlogo.png"
-        alt="Logo"
-        class="h-16 w-14 md:h-24 md:w-24 object-contain"
-      />
-    </div>
-
-  </div>
-</header>
+            <img
+              src="/static/29taxlogo.png"
+              alt="Logo"
+              class="h-16 w-14 md:h-24 md:w-24 object-contain"
+            />
+          </div>
+        </div>
+      </header>
 
     <!-- Main -->
     <main class="flex-1">
       <div class="page-container pt-2 pb-24 text-center">
 
-        
-        <!-- Category quick nav -->
-        <div class="category-nav">
+
+          <div class="category-nav mt-5">
+            {% for cat in categories %}
+              {% if cat.products %}
+              <a
+                href="#{{ cat.name |replace(' ', '-') }}"
+                class="uppercase text-2xl p-1 font-black tracking-widest border-b-4 text-white cursor-pointer hover:-translate-y-0.5"
+              >
+                {{ cat.name }}
+              </a>
+              {% endif %}
+            {% endfor %}
+          </div>
+
           {% for cat in categories %}
-            <a
-              href="#{{ cat.name |replace(' ', '-') }}"
-              class="text-2xl category-button  cursor-pointer"
-            >
-              {{ cat.name }}
-            </a>
-          {% endfor %}
-        </div>
-
-        <!-- Categories -->
-        {% for cat in categories %}
-        {% if cat.products %}
-          <section id="{{ cat.name|replace(' ', '-') }}" class="mb-14">
-            <div class="category-header">
-              <div class="category-line"></div>
-              <h2 class="category-title text-2xl">
+          {% if cat.products %}
+            <section id="{{ cat.name|replace(' ', '-') }}" class="mb-14 flex flex-col gap-5 items-center">
+              <h3 class="border-l-4 border-white category-title text-center flex px-4 mx-auto text-2xl">
                 {{ cat.name }} 
-              </h2>
-            </div>
+              </h3>
 
-            <div class="product-grid">
-              {% for product in cat.products %}
-                <!-- <button
-                  hx-get="/product-options/{{ product.id }}"
-                  hx-target="#modal-body"
-                  hx-swap="innerHTML"
-                  onclick="document.getElementById('modal').style.display='flex'"
-                  class="product-card {% if product.available %} cursor-pointer {% else %} cursor-not-allowed {% endif %}"
-                > -->
-                <button
-                      {% if product.available %}
-                        hx-get="/product-options/{{ product.id }}"
-                        hx-target="#modal-body"
-                        hx-swap="innerHTML"
-                        onclick="document.getElementById('modal').style.display='flex'"
-                      {% else %}
-                        disabled
-                      {% endif %}
-                      class="product-card {% if product.available %}is-available{% else %}is-unavailable{% endif %}"
-                    >
+            <div class=" w-3/5 mx-auto grid grid-cols-3 gap-3">
+                {% for product in cat.products %}
+                  <button
+                        {% if product.available %}
+                          hx-get="/product-options/{{ product.id }}"
+                          hx-target="#modal-body"
+                          hx-swap="innerHTML"
+                          onclick="document.getElementById('modal').style.display='flex'"
+                        {% else %}
+                          disabled
+                        {% endif %}
+                      class="product-card py-5 {% if product.available %}is-available{% else %}is-unavailable{% endif %}"
+                      >
 
-                  <div class="product-top">
-                    <h3 class="product-name text-xl">
-                      {{ product.name }}
-                    </h3>
-                    <span class="product-price">
-                      €{{ "%.2f"|format(product.price) }}
-                    </span>
-                  </div>
-                </button>
-              {% endfor %}
-            </div>
-          </section>
-        {% endif %}
-        {% endfor %}
+                    <div class="product-top">
+                      <h3 class="product-name text-xl">
+                        {{ product.name }}
+                      </h3>
+                      <span class="product-price">
+                        €{{ "%.2f"|format(product.price) }}
+                      </span>
+                    </div>
+                  </button>
+                {% endfor %}
+              </div>
+            </section>
+          {% endif %}
+          {% endfor %}
+      
+
+      <div id="cart-wrapper" class="cart-button-wrapper {% if not cart %}cursor-not-allowed{% endif %}">
+        <a 
+          id="cart-btn"
+          href="/cart" 
+          class="cart-button {% if not cart %}grayscale pointer-events-none border-black{% endif %} flex items-center justify-center p-3 border-r-8 border-lime-800 bg-[#556b2f] text-white font-bold transition-all"
+        >
+          <span id="cart-text">
+            {% if cart %}🛒 Προβολή καλαθιού{% else %}🛒 Άδειο{% endif %}
+          </span>
+        </a>
       </div>
-    </main>
 
-    <!-- Fixed Cart Button -->
-    <div id="cart-wrapper" class="cart-button-wrapper {% if not cart %}cursor-not-allowed{% endif %}">
-      <a 
-        id="cart-btn"
-        href="/cart" 
-        class="cart-button {% if not cart %}grayscale pointer-events-none border-black{% endif %} flex items-center justify-center p-3 border-r-8 border-lime-800 bg-[#556b2f] text-white font-bold transition-all"
-      >
-        <span id="cart-text">
-          {% if cart %}🛒 Προβολή καλαθιού{% else %}🛒 Άδειο{% endif %}
-        </span>
-      </a>
-    </div>
-
-    <!-- Modal -->
-    <div
-      id="modal"
-      class="modal-overlay"
-      onclick="if(event.target.id==='modal'){document.getElementById('modal').style.display='none'}">
-      <div class="modal-panel">
-        <div id="modal-body">
-          <p class="text-gray-500 text-center">Loading...</p>
+      <div
+        id="modal"
+        class="modal-overlay"
+        onclick="if(event.target.id==='modal'){document.getElementById('modal').style.display='none'}">
+        <div class="modal-panel">
+          <div id="modal-body">
+            <p class="text-gray-500 text-center">Loading...</p>
+          </div>
         </div>
       </div>
-    </div>
 
 
   </div>
   {% include "partials/footer.html" %}
-</body>
 <script>
 document.body.addEventListener('htmx:afterRequest', function(evt) {
     // Only trigger if the request was an "add to cart" action
@@ -164,4 +145,5 @@ document.body.addEventListener('htmx:afterRequest', function(evt) {
 
   
 </script>
+</body>
 </html>

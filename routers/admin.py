@@ -51,7 +51,7 @@ async def admin_dashboard(request: Request, db: Session = Depends(get_session)):
 async def login_post(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_session)):
     admin = db.exec(select(AdminUser).where(AdminUser.username == username)).first()
     if not admin or admin.hashed_password != hash_password(password):
-        return templates.TemplateResponse(request=request, name="login.html", context={"error": "Invalid credentials"})
+        return templates.TemplateResponse(request=request, name="login.html", context={"error": "Λάθος στοιχεία σύνδεσης"})
         
     response = RedirectResponse(url="/admin", status_code=303)
     response.set_cookie(key="kylikeio_session", value="authenticated_admin_token", httponly=True)
@@ -81,10 +81,11 @@ def check_admin(request: Request):
 @router.post("/admin/product/create")
 def create_product(
     request: Request, 
-    name: str = Form(...),
-    category_id: int = Form(...),
-    price: float = Form(...),
-    # Add these to catch the "Drafted" options from JS
+    # 1. Change to default=None so FastAPI doesn't block the request
+    name: str | None = Form(default=None),
+    category_id: int | None = Form(default=None),
+    price: float | None = Form(default=None),
+    
     opt_group: list[str] = Form(default=[]),
     opt_val: list[str] = Form(default=[]),
     opt_price: list[float] = Form(default=[]),
@@ -92,17 +93,33 @@ def create_product(
 ):
     check_admin(request)
 
-    # 1. Create the Product
+    # 2. Check for missing fields manually
+    missing = []
+    if not name:
+        missing.append("Όνομα")
+    if category_id is None:
+        missing.append("Κατηγορία")
+    if price is None:
+        missing.append("Τιμή")
+
+    # 3. If anything is missing, return an Out-Of-Band script
+    if missing:
+        msg = f"Προσοχή! Λείπουν τα εξής πεδία: {', '.join(missing)}"
+        # hx-swap-oob="true" tells HTMX to execute this script anywhere, 
+        # without destroying the form the user was just filling out!
+        return HTMLResponse(
+            f"<script hx-swap-oob='true'>alert('{msg}');</script>", 
+            status_code=200
+        )
+
+    # 4. If everything is good, continue creating the product as normal
     product = Product(name=name, category_id=category_id, price=price)
     db.add(product)
-    
-    # 2. Flush to get the ID without committing yet
     db.flush() 
 
-    # 3. Create the options and link them to the new ID
     for g, v, p in zip(opt_group, opt_val, opt_price):
         new_option = ProductOption(
-            product_id=product.id, # Now we have an ID!
+            product_id=product.id,
             group_name=g,
             value=v,
             extra_price=p
@@ -113,7 +130,6 @@ def create_product(
     db.refresh(product)
 
     return HTMLResponse("<script>document.getElementById('edit-modal').remove();</script>", headers={"HX-Trigger": "productUpdated"})
-
 @router.get("/admin/product/create")
 def get_create_form(request: Request, db: Session = Depends(get_session)):
     check_admin(request)
@@ -323,19 +339,70 @@ async def admin_orders(
 
     orders = db.exec(query).all()
 
+    now = datetime.now(timezone.utc)
+
+    orders_data = []
+
+    for order in orders:
+        # 2. Extract the creation time
+        order_time = order.created_at
+        
+        # 3. Safely re-attach the UTC timezone if the database stripped it
+        if order_time.tzinfo is None:
+            order_time = order_time.replace(tzinfo=timezone.utc)
+
+        # 4. Calculate the delta (this results in a timedelta object)
+        time_delta = now - order_time
+        
+        # 5. Convert the delta to total minutes
+        minutes_passed = int(time_delta.total_seconds() / 60)
+        
+        # 6. Format it for the barista
+        if minutes_passed < 1:
+            time_str = "Τώρα"
+        elif minutes_passed < 60:
+            time_str = f"{minutes_passed}λ"
+        else:
+            hours = int(minutes_passed / 60)
+            time_str = f"{hours}ω"
+
+        # 7. Append to a dictionary to avoid Pydantic Model errors
+        orders_data.append({
+            "order": order,
+            "minutes_passed": minutes_passed,
+            "time_str": time_str
+        })
     context = {
         "request": request,
-        "orders": orders,
+        "orders_data": orders_data,
         "current_status": status
     }
-
+    headers = {}
+    is_htmx = request.headers.get("HX-Request")
+    
+    # 1. ONLY run this if it's an HTMX request, we are on the pending tab, AND the list isn't empty!
+    if is_htmx and status == "pending" or "all" and orders:
+        newest_order = orders[0]
+        
+        # 2. Make it timezone aware for comparison
+        dt_aware = newest_order.created_at
+        if dt_aware.tzinfo is None:
+            dt_aware = dt_aware.replace(tzinfo=timezone.utc)
+        
+        # 3. Calculate age in seconds
+        order_age_seconds = (now - dt_aware).total_seconds()
+        
+        # 4. Trigger only if it's a "New Arrival" 
+        if 0 <= order_age_seconds <= 12:
+            headers["HX-Trigger"] = "newOrder"
+    
     # If it's an HTMX poll/request, only return the table rows
-    if request.headers.get("HX-Request"):
+    if is_htmx:
         return templates.TemplateResponse(
             name="partials/admin_orders_list.html", 
             context=context,
+            headers=headers,
             request=request
-            
         )
 
     # Full page load
@@ -416,15 +483,3 @@ async def get_order_details(request: Request,order_id: int, db: Session = Depend
     )
 
 
-def delete_old_orders(db: Session):
-    # Calculate the date 7 days ago
-    # We use UTC to avoid timezone headaches
-    threshold = datetime.now(timezone.utc) - timedelta(days=7)
-    
-    # Define the delete statement
-    statement = delete(Order).where(Order.created_at < threshold)
-    
-    # Execute and commit
-    result = db.exec(statement)
-    db.commit()
-    return result.rowcount

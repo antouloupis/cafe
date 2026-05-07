@@ -1,24 +1,34 @@
-{% for order in orders %}
-    <!-- Use 'article' for each individual order unit -->
-    <article class="flex border-b">
+{% for item in orders_data %}
+    <article class="flex border-b border-gray-400">
         
-        <!-- SECTION 1: The Clickable Info Area -->
-        <div class="flex-grow p-4 cursor-pointer hover:bg-olive-100" 
-             hx-get="/admin/order/{{ order.id }}/details" 
+        <div class="grow py-2 px-3 cursor-pointer hover:bg-olive-100" 
+             hx-get="/admin/order/{{ item.order.id }}/details" 
              hx-target="#detail-pane">
-            <h3 class="font-bold text-lg">#{{ order.id }}</h3>
-            <p class="text-sm uppercase font-extrabold text-[#556b2f]">{{ order.location }}</p>
-            <!-- Here we use our 'Time Ago' logic -->
-            <time class="text-xs text-gray-500">{{ order.created_at }}</time>
-        </div>
+            <h3 class="font-bold text-lg">#{{ item.order.id }}</h3>
 
-        <!-- SECTION 2: The Immediate Actions -->
-        <div class="p-4 flex flex-col justify-center border-l">
-            <button hx-post="/admin/order/{{ order.id }}/change_status?new_status=completed&current_filter={{ current_status }}"
-                    hx-target="#admin-orders-list"
-                    class="bg-[#556b2f] text-white px-3 py-1 text-xs font-bold mb-1">
-                DONE
-            </button>
+            <div class="flex justify-between">
+                {% if item.order.location == "Υπασπιστήριο" %}
+                <p class="font-black text-white bg-red-700 px-3 py-1 rounded ">
+                        {{ item.order.location }}
+                </p>
+                {% elif item.order.location in ["Επιτελάρχης", "Υποδιοικητής"] %}
+                <p class="font-bold bg-yellow-400 px-3 py-1 rounded">{{ item.order.location }}</p>
+                {% else %}
+                <p class="font-bold text-lime-700">{{ item.order.location }}</p>
+                {% endif %}
+                {% if current_status == "all" %}
+                    {% if item.order.status == "completed" %}
+                    <p class="font-bold text-sm bg-green-900 text-white px-2 rounded">Επιτυχής</p>
+                    {% elif item.order.status == "canceled" %}
+                    <p class="font-bold text-sm bg-red-600 text-white px-2 rounded">Ακυρώθηκε</p>
+                    {% else %}
+                    <p class="font-bold text-sm bg-cyan-700 text-white px-2 rounded">Εκκρεμεί</p>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            <!-- Get the time_str from the item dictionary, not the order model -->
+            <time class="text-sm text-gray-600">{{ item.time_str }}</time>
         </div>
     </article>
 {% else %}

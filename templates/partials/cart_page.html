@@ -23,14 +23,14 @@
     </header>
 
     <main class="flex-1">
-      <div class="page-container pt-7 pb-24 text-center">
+      <div class="w-3/5 flex flex-col mx-auto pt-7 pb-24 text-center">
         {% if not cart %}
           <div class="max-w-2xl mx-auto bg-[#f8f8f6] border border-[#d6d6cc] shadow-sm p-8">
             <h2 class="text-4xl font-extrabold uppercase text-[#2f3517]">Το καλάθι είναι άδειο</h2>
             <button onclick="window.location='/'" class="mt-6 bg-[#556b2f]  text-white px-6 py-5 font-bold uppercase cursor-pointer">Επιστροφή στο Μενού</button>
           </div>
         {% else %}
-          <div class="max-w-5xl mx-auto space-y-6">
+          <div class="gap-y-6 flex flex-col">
             {% for item in cart_items %}
               <div class="bg-[#f8f8f6] border border-[#d6d6cc] shadow-sm p-6 text-left">
                 <div class="flex flex-col md:flex-row justify-between gap-6">
@@ -74,11 +74,11 @@
           </div>
 
           <!-- Totals & Location -->
-          <div class="max-w-5xl mx-auto mt-8 grid grid-cols-3 gap-3">
+          <div class="mt-8 grid grid-cols-2 gap-3">
 
              <div class="bg-[#f8f8f6] border border-[#d6d6cc] p-6 text-left">
-              <div>
-                <label class="block text-xl font-bold mb-3">Τοποθεσία Παράδοσης</label>
+              <div class="flex flex-col gap-2">
+                <label class="text-xl font-bold mb-3">Τοποθεσία Παράδοσης</label>
                 <select id="delivery-location" name="location" class="w-full border p-4 text-xl font-semibold cursor-pointer">
                     <option value="1">1ο Γραφείο</option>
                     <option value="2">2ο Γραφείο</option>
@@ -92,43 +92,43 @@
                 </select>
               </div>
              </div>
-                <div class="bg-[#f8f8f6] border border-[#d6d6cc] p-2 text-left relative">
-
-                  <span class="absolute top-2 left-1/2 -translate-x-1/2 
-                              text-lg text-black font-bold uppercase 
-                              pointer-events-none tracking-wide whitespace-nowrap">
+   
+   
+             <div class="bg-[#f8f8f6] border border-[#d6d6cc] p-6 text-left flex flex-col gap-2">
+                <span class="text-lg text-black font-bold uppercase 
+                              pointer-events-none tracking-wide mb-3">
                     Σχόλια / Ειδικές Οδηγίες
-                  </span>
+                </span>
 
               <textarea 
-                    name="comment"
-                     id="comment"
+                      name="comment"
+                      id="comment"
                       placeholder="π.χ. Χωρίς κρεμμύδι..."
-                       class="block mx-auto mt-9
-       w-[95%] h-[190px] p-1 bg-white border border-[#d6d6cc] 
-       rounded-none text-lg text-gray-800 font-medium outline-none transition-all
-       focus:border-[#556b2f] focus:ring-2 focus:ring-[#556b2f]/20
-       resize-none placeholder:text-gray-400"
+                      class="block w-full h-full p-4
+                      bg-white border border-[#d6d6cc] 
+                      rounded-none text-lg text-gray-800 font-medium outline-none transition-all
+                      focus:border-[#556b2f] focus:ring-2 focus:ring-[#556b2f]/20
+                      resize-none placeholder:text-gray-400"
                ></textarea>
 
                 </div>
                             
-              <div class="bg-[#556b2f] text-white p-6 shadow-lg">
-                <p class="uppercase text-white/80">Γενικό Σύνολο</p>
-                <p class="text-4xl font-extrabold">€{{ "%.2f"|format(grand_total) }}</p>
-                <div class="mt-6 flex gap-1"> 
-                   <button hx-post="/place-order" hx-target="#page" hx-include="#delivery-location,#comment" 
-                           class="bg-white text-[#556b2f] px-6 py-3 font-bold uppercase flex-1 cursor-pointer">Καταχώρηση</button>
-                   <!-- <a href="/" class="border border-white px-9 py-5 font-bold uppercase cursor-pointer">Πίσω στο Μενού</a> -->
-                   <a href="/" class="border border-white px-6 py-5 font-bold uppercase cursor-pointer text-center">
-  <span class="block">Πίσω στο</span>
-  <span class="block">Μενού</span>
-</a>
-                </div>
-             </div>
+
            
          
         </div>
+          <div class="bg-[#556b2f] text-white p-6 shadow-lg mt-6">
+                <p class="uppercase text-white/80">Γενικό Σύνολο</p>
+                <p class="text-4xl font-extrabold">€{{ "%.2f"|format(grand_total) }}</p>
+                <div class="mt-6 flex gap-3"> 
+                   <button hx-post="/place-order" hx-target="#page" hx-include="#delivery-location,#comment" 
+                           class="bg-white text-[#556b2f] text-2xl px-6 py-3 font-bold uppercase w-3/5 cursor-pointer">Καταχώρηση</button>
+                   <!-- <a href="/" class="border border-white px-9 py-5 font-bold uppercase cursor-pointer">Πίσω στο Μενού</a> -->
+                   <a href="/" class="w-2/5 border border-white px-6 py-5 font-bold uppercase cursor-pointer text-center hover:bg-white/10">
+                    <p class="mx-auto">Πίσω στο Μενού</p>
+                  </a>
+                </div>
+             </div>
 
          
 

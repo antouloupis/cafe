@@ -2,25 +2,37 @@
 
 {% block content %}
 <!-- Filter Tabs -->
-<div class="flex gap-2 mb-6">
+<div class="flex gap-2 p-5 shrink-0">
     <a href="?status=pending" class="px-4 py-2 {% if current_status == 'pending' %}bg-[#556b2f] text-white{% else %}bg-white{% endif %}">Νέες</a>
     <a href="?status=completed" class="px-4 py-2 {% if current_status == 'completed' %}bg-[#556b2f] text-white{% else %}bg-white{% endif %}">Ολοκληρωμένες</a>
+    <a href="?status=canceled" class="px-4 py-2 {% if current_status == 'canceled' %}bg-[#556b2f] text-white{% else %}bg-white{% endif %}">Ακυρωμένες</a>
     <a href="?status=all" class="px-4 py-2 {% if current_status == 'all' %}bg-[#556b2f] text-white{% else %}bg-white{% endif %}">Ιστορικό</a>
 </div>
 
-<div class="flex gap-10 justify-between px-5">
-<section class="w-1/3 overflow-y-auto border-r" id="master-pane">
+<div class="flex flex-1 gap-10 px-5 pb-5 overflow-hidden">
+<section class="w-1/3 h-full overflow-y-auto border" id="master-pane">
     <div id="admin-orders-list"
-        class="flex-grow overflow-y-auto"
         hx-get="/admin/orders?status={{ current_status }}" 
         hx-trigger="orderChanged from:body, every 10s"
         hx-swap="innerHTML">
         {% include "partials/admin_orders_list.html" %}
     </div>
 </section>
-<section id="detail-pane" class="flex w-full gap-5">
+<section id="detail-pane" class="w-2/3 h-full overflow-hidden flex gap-5">
     <div class="text-gray-400 text-center my-auto">Επέλεξε παραγγελία για να δείς λεπτομέρειες</div>
 </section>
 </div>
-
+<audio id="order-ding" src="/static/new_order.mp3" preload="auto"></audio>
 {% endblock content %}
+
+{% block scripts %}
+<script>
+    document.body.addEventListener("newOrder", () => {
+        const audio = document.getElementById("order-ding");
+                audio.currentTime = 0;
+        audio.play().catch(error => {
+            console.warn("Sound blocked: Barista must click the page first to enable audio.");
+        });
+    });
+</script>
+{% endblock %}
