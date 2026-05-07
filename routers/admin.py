@@ -45,7 +45,7 @@ async def admin_dashboard(request: Request, db: Session = Depends(get_session)):
     return templates.TemplateResponse(
         request=request,
         name="product_admin.html",
-        context={"title": "Admin Dashboard", "products": products, "categories": categories, "CAFE_STATUS": CAFE_STATE["is_open"]})
+        context={ "products": products, "categories": categories, "CAFE_STATUS": CAFE_STATE["is_open"]})
 
 @router.post("/login")
 async def login_post(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_session)):
@@ -93,7 +93,6 @@ def create_product(
 ):
     check_admin(request)
 
-    # 2. Check for missing fields manually
     missing = []
     if not name:
         missing.append("Όνομα")
@@ -102,14 +101,23 @@ def create_product(
     if price is None:
         missing.append("Τιμή")
 
-    # 3. If anything is missing, return an Out-Of-Band script
+    # --- THE HTMX RETARGET FIX ---
     if missing:
-        msg = f"Προσοχή! Λείπουν τα εξής πεδία: {', '.join(missing)}"
-        # hx-swap-oob="true" tells HTMX to execute this script anywhere, 
-        # without destroying the form the user was just filling out!
+        msg = f"Λείπουν τα εξής πεδία: {', '.join(missing)}"
+            
+        # Create a nice red error box
+        error_html = f"""
+        <div class="p-3 bg-red-100 border border-red-400 text-red-700 font-bold rounded shadow-sm">
+        ⚠️ Προσοχή: {msg}
+        </div>
+        """
+            
         return HTMLResponse(
-            f"<script hx-swap-oob='true'>alert('{msg}');</script>", 
-            status_code=200
+            content=error_html, 
+            headers={
+                "HX-Retarget": "#form-errors", # Send the error to the new div
+                "HX-Reswap": "innerHTML"       # Put it inside the div
+            }
         )
 
     # 4. If everything is good, continue creating the product as normal
@@ -375,13 +383,15 @@ async def admin_orders(
     context = {
         "request": request,
         "orders_data": orders_data,
-        "current_status": status
+        "current_status": status,
+        "CAFE_STATUS": CAFE_STATE["is_open"],
+        "title": "Παραγγελίες",
+
     }
     headers = {}
     is_htmx = request.headers.get("HX-Request")
     
-    # 1. ONLY run this if it's an HTMX request, we are on the pending tab, AND the list isn't empty!
-    if is_htmx and status == "pending" or "all" and orders:
+    if is_htmx and status in ["pending", "all"] and orders:
         newest_order = orders[0]
         
         # 2. Make it timezone aware for comparison
@@ -483,3 +493,73 @@ async def get_order_details(request: Request,order_id: int, db: Session = Depend
     )
 
 
+def get_weekly_stats(db: Session):
+    query = select(Order).where(Order.status == "completed")
+    completed_orders = db.exec(query).all()
+
+    total_revenue = 0.0
+    product_breakdown = {}
+    location_breakdown = {} 
+
+    for order in completed_orders:
+        total_revenue += order.total
+        
+        loc = order.location
+        if loc not in location_breakdown:
+            location_breakdown[loc] = {"orders": 0, "revenue": 0.0}
+        
+        location_breakdown[loc]["orders"] += 1
+        location_breakdown[loc]["revenue"] += order.total
+
+        for item in order.items:
+            name = item.name
+            if name not in product_breakdown:
+                product_breakdown[name] = {"quantity": 0, "revenue": 0.0}
+            
+            product_breakdown[name]["quantity"] += item.quantity
+            product_breakdown[name]["revenue"] += item.total
+
+    sorted_products = sorted(
+        product_breakdown.items(), 
+        key=lambda x: x[1]["revenue"], 
+        reverse=True
+    )
+
+    # 4. Grab BOTH the name and the stats using a dictionary
+    top_by_amount = {"name": "Καμία", "orders": 0}
+    top_by_income = {"name": "Καμία", "revenue": 0.0}
+    
+    if location_breakdown:
+        # max() returns a tuple like ('Υπασπιστήριο', {'orders': 15, 'revenue': 45.5})
+        amt_winner = max(location_breakdown.items(), key=lambda x: x[1]["orders"])
+        top_by_amount = {"name": amt_winner[0], "orders": amt_winner[1]["orders"]}
+
+        inc_winner = max(location_breakdown.items(), key=lambda x: x[1]["revenue"])
+        top_by_income = {"name": inc_winner[0], "revenue": round(inc_winner[1]["revenue"], 2)}
+
+    return {
+        "total_revenue": round(total_revenue, 2),
+        "total_orders": len(completed_orders),
+        "products": sorted_products,
+        "top_amount": top_by_amount,
+        "top_income": top_by_income
+    }
+
+@router.get("/admin/statistics")
+def admin_statistics(request: Request, db: Session = Depends(get_session)):
+    
+    # Get the stats dictionary
+    stats = get_weekly_stats(db)
+
+    # THE FIX: Explicitly name the arguments!
+    return templates.TemplateResponse(
+        request=request,
+        name="admin_stats.html", 
+        context={
+            "request": request, 
+            "stats": stats,
+            "CAFE_STATUS": CAFE_STATE["is_open"],
+            "title": "Στατιστικά εβδομάδας",
+
+        }
+    )

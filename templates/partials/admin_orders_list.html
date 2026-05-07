@@ -18,11 +18,11 @@
                 {% endif %}
                 {% if current_status == "all" %}
                     {% if item.order.status == "completed" %}
-                    <p class="font-bold text-sm bg-green-900 text-white px-2 rounded">Επιτυχής</p>
+                    <p class="font-bold text-sm bg-green-900 text-white px-2 py-1 rounded my-auto">Επιτυχής</p>
                     {% elif item.order.status == "canceled" %}
-                    <p class="font-bold text-sm bg-red-600 text-white px-2 rounded">Ακυρώθηκε</p>
+                    <p class="font-bold text-sm bg-red-600 text-white px-2 py-1 rounded my-auto">Ακυρώθηκε</p>
                     {% else %}
-                    <p class="font-bold text-sm bg-cyan-700 text-white px-2 rounded">Εκκρεμεί</p>
+                    <p class="font-bold text-sm bg-cyan-700 text-white px-2 py-1 rounded my-auto">Εκκρεμεί</p>
                     {% endif %}
                 {% endif %}
             </div>

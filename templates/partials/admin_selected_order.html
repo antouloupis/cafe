@@ -32,7 +32,7 @@
             {% if item.options %}
             <div class="flex gap-3 flex-wrap mt-3">
                 {% for option in item.options %}
-                <span class="bg-amber-200 rounded-full p-1 px-3 text-sm rounded font-semibold">{{option.value}} {% if option.extra_cost >0 %}(+{{option.extra_cost}} €){% endif %}</span>
+                <span class="bg-amber-200 rounded-full p-1 px-3 text-sm font-semibold">{{option.value}} {% if option.extra_cost >0 %}(+{{option.extra_cost}} €){% endif %}</span>
                 {% endfor %}
             </div>
             {% endif %}

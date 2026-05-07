@@ -1,0 +1,50 @@
+{% extends 'base_admin.html' %}
+{% block content %}
+<div class="flex h-10/12 mt-6 px-10">
+
+<div class="bg-white shadow-xl border-t-4 rounded-xl w-1/3 p-6">
+    <h3 class="text-xl font-black mb-4">Πωλήσεις ανά Προϊόν</h3>
+
+    <div class="flex flex-col gap-2 overflow-y-auto">
+        {% for name, data in stats.products %}
+        <div class="flex justify-between items-center p-3 border-b">
+            <span class="font-bold text-lg">{{ name }}</span>
+            <div class="flex gap-4">
+                <span class="bg-sky-100 text-sky-800 px-3 py-1 rounded font-bold">
+                    {{ data.quantity }} τεμ.
+                </span>
+                <span class="bg-lime-100 text-lime-800 px-3 py-1 rounded font-bold w-24 text-right">
+                    {{ data.revenue }} €
+                </span>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-gray-500 italic">Δεν υπάρχουν πωλήσεις ακόμα.</p>
+        {% endfor %}
+    </div>
+</div>
+<div class="m-auto gap-5 flex flex-col">
+    <h4 class="text-xl text-center font-bold">Στατιστικά εβδομάδας</h4>
+    <div class="grid grid-cols-2 gap-10">
+        <div class="p-6 bg-white shadow rounded-xl border-t-4 border-[#556b2f]">
+            <h3 class="text-gray-500 font-bold ">Συνολικός Τζίρος</h3>
+            <p class="text-4xl font-black">{{ stats.total_revenue }} €</p>
+        </div>
+        <div class="p-6 bg-white shadow rounded-xl border-t-4 border-[#556b2f]">
+            <h3 class="text-gray-500 font-bold ">Σύνολο Παραγγελιών</h3>
+            <p class="text-4xl font-black">{{ stats.total_orders }}</p>
+        </div>
+        <div class="p-6 bg-white shadow rounded-xl border-t-4 border-sky-600">
+            <h3 class="text-gray-500 font-bold text-sm">Top Γραφείο (Παραγγελίες)</h3>
+            <p class="text-xl font-black mt-2 text-sky-800">{{ stats.top_amount.name }} ({{ stats.top_amount.orders }})</p>
+        </div>
+
+        <div class="p-6 bg-white shadow rounded-xl border-t-4 border-amber-500">
+            <h3 class="text-gray-500 font-bold text-sm">Top Γραφείο (Τζίρος)</h3>
+            <p class="text-xl font-black mt-2 text-amber-600">{{ stats.top_income.name }} ({{stats.top_income.revenue}} €)</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
